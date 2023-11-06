@@ -8,9 +8,12 @@ import 'package:botbridge_green/View/NewBookingView.dart';
 import 'package:botbridge_green/View/NewRequestView.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:botbridge_green/View/PaymentView.dart';
+import 'package:botbridge_green/View/ServicesView.dart';
 import 'package:botbridge_green/View/upipayView.dart';
+import 'package:botbridge_green/ViewModel/BookedServiceVM.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import '../Utils/LocalDB.dart';
 import 'Helper/Drawer.dart';
 
@@ -56,10 +59,9 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
   final scaffoldkey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
-    // TODO: implement initState
-    // _animationController =
-    // AnimationController(vsync: this, duration: const Duration(seconds: 0));
-    // _animationController.repeat(reverse: true);
+            BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+model.clearbookedtest();
+
     getData();
     // venueNo=venueNo;
     // venueBranchNo= widget.ven_branch;

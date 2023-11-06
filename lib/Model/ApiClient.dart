@@ -198,6 +198,7 @@ Future<dynamic> Loginclint(String url,Map<String, dynamic> params) async {
     params["venueBranchNo"] = int.parse(venueBranchNo);
     
     var body = json.encode(params);
+    print('\x1B[31m$body\x1B[0m');
     
     var response = await http.post(
       urlData,

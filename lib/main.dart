@@ -1,9 +1,10 @@
 import 'package:botbridge_green/View/ExistedPatientView.dart';
+import 'package:botbridge_green/View/ServicesView.dart';
 import 'package:botbridge_green/View/SplashView.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'View/SearchReferralView.dart';
 import 'ViewModel/AppointmentListVM.dart';
@@ -21,13 +22,14 @@ import 'firebase_options.dart';
 
 
 Future<void> main() async {
+ 
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   print(FlutterError.onError);
   runApp(
       MultiProvider(

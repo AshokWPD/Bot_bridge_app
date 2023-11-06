@@ -725,7 +725,7 @@ setState(() {
                 )
               ),
               const SizedBox(height: 10),
-               Text(type == 0 ? "Payment submitted successfully" : content,style: const TextStyle(color:Colors.black54,fontSize: 18,),maxLines: 2,),
+               Text(type == 0 ? "Pay on Delivary selected!" : content,style: const TextStyle(color:Colors.black54,fontSize: 18,),maxLines: 2,),
               const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -734,10 +734,10 @@ setState(() {
                     onTap: (){
         // NavigateController.pagePush(context, widget.nextpage);
 
-                      type == 0 ? NavigateController.pagePush(context, widget.nextpage) : Navigator.pop(context);
+                      type == 0 ? NavigateController.pagePush(context, HomeView()) : Navigator.pop(context);
                     },
                     child: const Center(
-                      child: Text( "Next",style: TextStyle(color:Color(0xff2454FF),fontSize: 15,fontWeight: FontWeight.w600),),
+                      child: Text( "Done",style: TextStyle(color:Color(0xff2454FF),fontSize: 15,fontWeight: FontWeight.w600),),
                     ),
                   ),
                   

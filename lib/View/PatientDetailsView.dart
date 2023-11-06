@@ -95,8 +95,10 @@ class _PatientDetailsViewState extends State<PatientDetailsView> {
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
       print(jsonResponse);
+      
       setState(() {
         data = AppointmentAndRequestData.fromJson(jsonResponse);
+        data!.lstPatientResponse==null?warningPopUp(context):null;
 
         isFetching=false;
       });
@@ -106,7 +108,28 @@ class _PatientDetailsViewState extends State<PatientDetailsView> {
   }
 
 
+  void  warningPopUp(BuildContext context){
+      print("called**************");
 
+
+QuickAlert.show(
+ context: context,
+ type:QuickAlertType.error,
+//  customAsset: "assets/images/ok_popup.gif",
+
+ text: "Somthing went wrong",
+ confirmBtnText: 'Ok',
+//  cancelBtnText: 'No',
+ onConfirmBtnTap: (){
+NavigateController.pagePushLikePop(context,  const HomeView());
+ },
+//  onCancelBtnTap: (){
+//   NavigateController.pagePOP(context);
+//  },
+ confirmBtnColor: Colors.green,
+);
+
+  }
 
 
 Future<void> fetchWeatherData() async {
@@ -813,6 +836,8 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
           child: Image.asset('assets/images/add_prescripton.png',height: height*0.025,color:   Colors.white,),
           backgroundColor: const Color(0xff84DF8F),
           onTap: () {
+
+
             NavigateController.pagePush(context,  AddPrescriptionView(bookingID: widget.bookingID, screenType: widget.screenType, booktype: widget.bookingType, regdate: widget.regdate,));
           },
          
@@ -920,18 +945,24 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
           // Navigator.pop(context);
           print(widget.bookingID);
           ispaid==true?
-        successStatusPOPUP(context, height, width, "Patient status Updated", BarcodePage(bookingID: widget.bookingID, bookingType: widget.bookingType, screentype: widget.screenType, ispaid:ispaid, regdate: widget.regdate ,)):
-        successStatusPOPUP(context, height, width, "Patient status Updated", PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingType: widget.bookingType, nextpage: BarcodePage(bookingID: widget.bookingID, bookingType: widget.bookingType, screentype: widget.screenType, ispaid:ispaid, regdate: widget.regdate ,), ));
+        successStatusPOPUP(context, height, width, "Patient status Updated", BarcodePage(bookingID: widget.bookingID, bookingType: widget.bookingType, screentype: widget.screenType, ispaid:ispaid, regdate: widget.regdate ,),"Next"):
+        successStatusPOPUP(context, height, width, "Patient status Updated", PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingType: widget.bookingType, nextpage: BarcodePage(bookingID: widget.bookingID, bookingType: widget.bookingType, screentype: widget.screenType, ispaid:ispaid, regdate: widget.regdate ,), ),"Next");
 
         }else if(widget.screenType == 2){
           bookingStatus==MainData.statusReject?
-              rejectPOPUP(context, height, width, "Patient Rejected",const NewRequestView()):
+              rejectPOPUP(context, height, width, "Request Rejected",const NewRequestView()):
+              successStatusPOPUP(context, height, width, "Request Accepted", const NewRequestView(),"Done");
 
-              successStatusPOPUP(context, height, width, "Patient Accepted",  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID: widget.bookingID, regdate: widget.regdate,));
+
+              // successStatusPOPUP(context, height, width, "Request Accepted",  BarcodePage(bookingID: widget.bookingID, bookingType: "APP", screentype: 1, ispaid:ispaid, regdate: widget.regdate ,),"Next"):
+              // successStatusPOPUP(context, height, width, "Request Accepted", PaymentView(bookingID: widget.bookingID, ScreenType: 1, bookingType: "APP", nextpage: BarcodePage(bookingID: widget.bookingID, bookingType: "APP", screentype:1, ispaid:ispaid, regdate: widget.regdate ,),),"Next");
+
+
+              // successStatusPOPUP(context, height, width, "Patient Accepted",  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID: widget.bookingID, regdate: widget.regdate,));
 
 //  NavigateController.pagePush(context,  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID: widget.bookingID,))  ;
         }else if(widget.screenType == 4){
-          successStatusPOPUP(context, height, width, "Patient status Updated", const HistoryView());
+          successStatusPOPUP(context, height, width, "Sample Submited to Lab", const CollectedSamplesView(),"Done");
 
         }
         else{
@@ -967,6 +998,7 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
  confirmBtnText: 'yes',
  cancelBtnText: 'No',
  onConfirmBtnTap: (){
+
   updateStatus(status,bookingID,context,ispaid,hight,width);
 
  },
@@ -1003,7 +1035,7 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
   }
 
 
-   void  successStatusPOPUP(BuildContext context,double height,double width,content,page){
+   void  successStatusPOPUP(BuildContext context,double height,double width,content,page,button){
       print("called");
 
 
@@ -1013,7 +1045,7 @@ QuickAlert.show(
 //  customAsset: "assets/images/ok_popup.gif",
 
  text: content,
- confirmBtnText: 'Next',
+ confirmBtnText: button,
 //  cancelBtnText: 'No',
  onConfirmBtnTap: (){
 NavigateController.pagePush(context,  page);

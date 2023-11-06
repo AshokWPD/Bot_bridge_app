@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:botbridge_green/Model/ServerURL.dart';
 import 'package:botbridge_green/Utils/NavigateController.dart';
+import 'package:botbridge_green/View/HomeView.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
+import 'package:botbridge_green/View/ServicesView.dart';
 import 'package:botbridge_green/View/TabbarView.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -65,7 +68,7 @@ FocusNode referalfocuse = FocusNode();
   bool isClient = false;
   bool isClicked = false;
   String txtdate='';
-
+bool emailerror=false;
   GoogleMapController? mapController;
   Set<Marker> markers = {};
   final Completer<GoogleMapController> _controller = Completer();
@@ -171,11 +174,20 @@ FocusNode referalfocuse = FocusNode();
 
   }
 bool usererror=false;
-
+ void showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+    );
+  }
   
 
   @override
   void initState() {
+    emailID.text='';
 txtdate=dateformatnow.format(DateTime.now()).toString();
     getData();
     // TODO: implement initState
@@ -251,24 +263,6 @@ txtdate=dateformatnow.format(DateTime.now()).toString();
   }
 
 
-//   void _validateText(String query) async {
-//   String UID = await LocalDB.getLDB("UID") ?? '';
-  
-//   if (query != UID) {
-//     setState(() {
-//       usererror = true;
-//     });
-//   } else {
-//     setState(() {
-//       usererror = false;
-//     });
-//   }
-// }
-
-
-
-
-
 String userNo='2';
 
 
@@ -280,13 +274,12 @@ String userNo='2';
                           var listOfTest = model.getNewBookData;
                           print(listOfTest);
                 
-                          bool referralCompleted = false;
-                          DateTime currentDateTime = DateTime.now();
+                          // bool referralCompleted = false;
+                          // DateTime currentDateTime = DateTime.now();
                           LocalDB.getLDB('userID').then((value) {
                             setState(() {
                               userNo=value;
                             });
-                
                               // DateFormat appDate =
                               // DateFormat("yyyy-MM-dd HH:mm:ss");
                               // DateFormat appTime =
@@ -368,10 +361,12 @@ void isfill(){
       age.text.isNotEmpty&&
        address.text.isNotEmpty&&
       area.text.isNotEmpty&&
-      pincode.text.isNotEmpty 
-      // selectedReferral!.isNotEmpty 
+      pincode.text.isNotEmpty &&
+      selectedReferral!.isNotEmpty 
          ){
-            _submitbutton();
+          selectedReferral!='Doctor'||physicianName!=''?
+            _submitbutton():
+       showGuide(context,"Please Fill All * Field");
 
       }
       else{
@@ -387,7 +382,12 @@ void isfill(){
           onTap: ()=>FocusScope.of(context).unfocus(),
           child: Scaffold(
             backgroundColor: Colors.white,
-      body: SingleChildScrollView(
+      body: WillPopScope(
+         onWillPop: ()async {
+            print("working-----------------------");
+                 FocusScope.of(context).unfocus();
+      NavigateController.pagePushLikePop(context,  const HomeView());     return false;
+          },
         child: Column(
           children: [
             Container(
@@ -413,6 +413,8 @@ void isfill(){
                       child: InkWell(
                           onTap: (){
                             NavigateController.pagePOP(context);
+                           BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+      model.clearbookedtest();
                           },
                           child: const Icon(Icons.arrow_back_ios,color: Colors.white,)),
                     ),
@@ -431,29 +433,7 @@ void isfill(){
                               },
                               child: const Icon(Icons.add,color: Colors.white,)),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(11),
-                          child: InkWell(
-                              onTap: (){
-                                Navigator.pushNamed(context, "ExistedPatient").then((value) {
-                                  if (value != null){
-                                    if(value != false){
-                                      Map<String,dynamic> data = value as Map<String,dynamic>;
-                                      print(data);
-                                      firstName.text = data['fname'].toString();
-                                      lastName.text = data['lname'].toString();
-                                      mobileNo.text = data['no'].toString();
-                                      emailID.text = data['mail'].toString();
-                                      pincode.text = data['pincode'].toString();
-                                      pincode.text = data['dob'].toString();
-                                      age.text = data['age'].toString();
-                                    }
-                                    print(value);
-                                  }
-                                });
-                              },
-                              child: const Icon(Icons.search,color: Colors.white,)),
-                        ),
+                      
                       ],
                     ),
                   ),
@@ -463,7 +443,7 @@ void isfill(){
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-
+      
                         Text("Book New Test",style: TextStyle(color: Colors.white,fontSize: 22,fontWeight: FontWeight.bold),),
                       ],
                     ),
@@ -471,732 +451,706 @@ void isfill(){
                 ],
               ),
             ),
-            SizedBox(
-              height: height * 0.87,
-              child: SingleChildScrollView(
-                // controller: control,
-                child: Form(
-                            key: _formkey,
-
-                  child: Column(
-                    children: [
-                
-                         SizedBox(height: height * 0.03,),
-                       SizedBox(
-                           width:  width * 0.9,
-                           height: height * 0.07,
-                           child: TextFormField(
-                       textInputAction: TextInputAction.next,
-                       cursorColor: Colors.black,
-                    //  key: const Key('text_form_field'), // Use a unique key
-                       controller: _username,
-                      //  onChanged: _validateText,
-                       style: const TextStyle(color: Colors.black54),
-                             keyboardType: TextInputType.text,
-                             decoration: InputDecoration(
-                         // filled: true,
-                   // errorText: '',
-                   errorStyle: const TextStyle(
-                     color: Colors.transparent,
-                     fontSize: 0,
-                   ),
-                   // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                         errorBorder: outline,
-                         focusedErrorBorder: outline,
-                         enabledBorder:outline,
-                         focusedBorder:outline,
-                         // focusColor: const Color(0xffEFEFEF),
-                
-                         label: const Text('UID',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                       ),
-                           ),
-                         ),
-                         usererror?
-                          
-                          const Align(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding: EdgeInsets.only(left: 20),
-                              child: Text("Invalid User Name",style: TextStyle(color: Colors.red),),
-                            ))
-                         
-                         :const Text(""),
-                      SizedBox(height: height * 0.013),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // SizedBox(width: width * 0.08),
-                          SizedBox(
-                            width:  width * 0.3,
-                            height: height * 0.07,
-                            child:DropdownButtonFormField2(
-                              dropdownDecoration: BoxDecoration(
-                                borderRadius:BorderRadius.circular(25) ,
-                              ),
-                              focusColor: Colors.white,
-                              validator: (value) {
-                                if (selectedTitle == null ) {
-                                  return "Please select title";
-                                }
-                                return null;
-                              },
-                              icon: const Padding(
-                                padding: EdgeInsets.only(bottom: 7,right: 8),
-                                child: Icon(Icons.keyboard_arrow_down),
-                              ),
-                              style: const TextStyle(color: Colors.black54),
-                              decoration:  InputDecoration(
-                                // contentPadding: ,
-                                //   contentPadding: const EdgeInsets.only(bottom: 18,left: 10),
-                                //   filled: true,
-                                //   focusColor: const Color(0xffEFEFEF),
-                                  errorStyle: const TextStyle(
-                                    color: Colors.transparent,
-                                    fontSize: 0,
-                                  ),
-                                  errorBorder: outline,
-                                  focusedErrorBorder: outline,
-                                  enabledBorder:outline,
-                                  focusedBorder:outline,
-                                  label: const Text('Title*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                
-                              ),
-                              selectedItemBuilder: (BuildContext context) {
-                                return titleList.map<Widget>((Title item) {
-                                  return Text(item.title,
-                                      style: const TextStyle(color: Colors.black));
-                                }).toList();
-                              },
-                              items: titleList.map((Title item) {
-                                return DropdownMenuItem<String>(
-                                  value: item.title,
-                                  child: Text(
-                                    item.title,
-                                    style: const TextStyle(fontSize: 13, color: Colors.black),
-                                  ),
-                                );
-                              }).toList(),
-                                 onChanged: (titleList) {
-              setState(() {
-            selectedTitle = titleList.toString();
-            titleType = titleList.toString();
-            genderType=titleToGenderMapping[titleList] ?? "";
-
-                // Update the gender selection based on the selected title
-                selectedGender = titleToGenderMapping[titleList];
-              });
-            },
-                              // onChanged: (titleList) {
-                              //   setState(() {
-                              //     selectedTitle = titleList.toString();
-                              //     titleType = titleList.toString();
-                              //   });
-                              // },
-                
-                              value: selectedTitle,
-                              isExpanded: true,
-                            ),
+            Expanded(
+              child: SizedBox(
+               // controller: control,
+               child: Form(
+                         key: _formkey,
+            
+               child: SingleChildScrollView(
+                 child: Column(
+                   children: [
+                 
+                        SizedBox(height: height * 0.03,),
+                      SizedBox(
+                          width:  width * 0.9,
+                          height: height * 0.07,
+                          child: TextFormField(
+                      textInputAction: TextInputAction.next,
+                      cursorColor: Colors.black,
+                      controller: _username,
+                      style: const TextStyle(color: Colors.black54),
+                            keyboardType: TextInputType.text,
+                            decoration: InputDecoration(
+                 
+                  errorStyle: const TextStyle(
+                    color: Colors.transparent,
+                    fontSize: 0,
+                  ),
+                        errorBorder: outline,
+                        focusedErrorBorder: outline,
+                        enabledBorder:outline,
+                        focusedBorder:outline,
+                 
+                        label: const Text('UID',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                      ),
                           ),
-                
-                          SizedBox(
-                           width:  width * 0.6,
+                        ),
+                        usererror?
+                         
+                         const Align(
+                           alignment: Alignment.centerLeft,
+                           child: Padding(
+                             padding: EdgeInsets.only(left: 20),
+                             child: Text("Invalid User Name",style: TextStyle(color: Colors.red),),
+                           ))
+                        
+                        :const Text(""),
+                     SizedBox(height: height * 0.013),
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                         // SizedBox(width: width * 0.08),
+                         SizedBox(
+                           width:  width * 0.3,
                            height: height * 0.07,
-                           child: TextFormField(
-                       textInputAction: TextInputAction.next,
-                       cursorColor: Colors.black,
-                       controller: firstName,
-                       style: const TextStyle(color: Colors.black54),
-                             keyboardType: TextInputType.name,
-                             textCapitalization: TextCapitalization.words,
-                             inputFormatters: <TextInputFormatter>[
-                               FilteringTextInputFormatter.allow(RegExp("[a-zA-Z ]")),
-                             ],
+                           child:DropdownButtonFormField2(
+                             dropdownDecoration: BoxDecoration(
+                               borderRadius:BorderRadius.circular(25) ,
+                             ),
+                             focusColor: Colors.white,
                              validator: (value) {
-                               if (value!.isEmpty) {
-                                    return "";
+                               if (selectedTitle == null ) {
+                                 return "Please select title";
                                }
                                return null;
                              },
-                
-                             decoration: InputDecoration(
-                         // filled: true,
-                   // errorText: '',
-                   errorStyle: const TextStyle(
-                     color: Colors.transparent,
-                     fontSize: 0,
-                   ),
-                   // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                         errorBorder: outline,
-                         focusedErrorBorder: outline,
-                         enabledBorder:outline,
-                         focusedBorder:outline,
-                         // focusColor: const Color(0xffEFEFEF),
-                
-                         label: const Text('First Name*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                       ),
+                             icon: const Padding(
+                               padding: EdgeInsets.only(bottom: 7,right: 8),
+                               child: Icon(Icons.keyboard_arrow_down),
+                             ),
+                             style: const TextStyle(color: Colors.black54),
+                             decoration:  InputDecoration(
+                  
+                                 errorStyle: const TextStyle(
+                                   color: Colors.transparent,
+                                   fontSize: 0,
+                                 ),
+                                 errorBorder: outline,
+                                 focusedErrorBorder: outline,
+                                 enabledBorder:outline,
+                                 focusedBorder:outline,
+                                 label: const Text('Title*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                 
+                             ),
+                             selectedItemBuilder: (BuildContext context) {
+                               return titleList.map<Widget>((Title item) {
+                                 return Text(item.title,
+                                     style: const TextStyle(color: Colors.black));
+                               }).toList();
+                             },
+                             items: titleList.map((Title item) {
+                               return DropdownMenuItem<String>(
+                                 value: item.title,
+                                 child: Text(
+                                   item.title,
+                                   style: const TextStyle(fontSize: 13, color: Colors.black),
+                                 ),
+                               );
+                             }).toList(),
+                                onChanged: (titleList) {
+                           setState(() {
+                           selectedTitle = titleList.toString();
+                           titleType = titleList.toString();
+                           genderType=titleToGenderMapping[titleList] ?? "";
+                         
+                 // Update the gender selection based on the selected title
+                 selectedGender = titleToGenderMapping[titleList];
+                           });
+                           },
+                             value: selectedTitle,
+                             isExpanded: true,
                            ),
                          ),
-                
-                        ],
-                      ),
-                    
-                      SizedBox(height: height * 0.013),
-                      SizedBox(
-                        width:  width * 0.9,
-                        height: height * 0.07,
-                        child: TextFormField(
-                          textInputAction: TextInputAction.next,
-                          cursorColor: Colors.black,
-                          controller: lastName,
-                          textCapitalization: TextCapitalization.words,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.allow(RegExp("[a-zA-Z ]")),
-                          ],
-                          style: const TextStyle(color: Colors.black54),
-                          keyboardType: TextInputType.name,
-                          // validator: (value) {
-                          //   if (value!.isEmpty) {
-                          //     return "Please enter Last name";
-                          //   }
-                          //   return null;
-                          // },
-                          decoration: InputDecoration(
-                              // filled: true,
-                              // focusColor: const Color(0xffEFEFEF),
-                              errorStyle: const TextStyle(
-                                color: Colors.transparent,
-                                fontSize: 0,
-                              ),
-                              // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                              errorBorder: outline,
-                              focusedErrorBorder: outline,
-                              enabledBorder:outline,
-                              focusedBorder:outline,
-                              floatingLabelStyle:const TextStyle(color: Colors.black54,fontSize: 14),
-                              label: const Text('Last Name',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                          ),
-                        ),
-                      ),
-                
-                      SizedBox(height: height * 0.013),
-                      SizedBox(
-                        width:  width * 0.9,
-                        height: height * 0.07,
-                        child: TextFormField(
-                          textInputAction: TextInputAction.next,
-                          cursorColor: Colors.black,
-                          controller: mobileNo,
-                          style: const TextStyle(color: Colors.black54),
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(10),
-                          ],
-                          textCapitalization: TextCapitalization.sentences,
-                          validator: (value) {
-                            if (value!.length != 10) {
-                              return "Please enter Valid number";
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                              // filled: true,
-                              // focusColor: const Color(0xffEFEFEF),
-                              errorStyle: const TextStyle(
-                                color: Colors.transparent,
-                                fontSize: 0,
-                              ),
-                              // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                              errorBorder: outline,
-                              focusedErrorBorder: outline,
-                              enabledBorder:outline,
-                              focusedBorder:outline,
-                              label: const Text('Mobile No*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: height * 0.013),
-                      SizedBox(
-                        width:  width * 0.9,
-                        height: height * 0.07,
-                        child: TextFormField(
-                          textInputAction: TextInputAction.next,
-                          cursorColor: Colors.black,
-                          controller: emailID,
-                          style: const TextStyle(color: Colors.black54),
-                          keyboardType: TextInputType.emailAddress,
-                          textCapitalization: TextCapitalization.sentences,
-                          // validator: (value) { to validate email value is present or not
-                          //   if (value!.isEmpty) {
-                          //     return "Please enter Valid Mail";
-                          //   }
-                          //   return null;
-                          // },
-                          decoration: InputDecoration(
-                              // filled: true,
-                              // focusColor: const Color(0xffEFEFEF),
-                              // contentPadding: const EdgeInsets.only(top: 4,left: 7),
-                              errorStyle: const TextStyle(
-                                color: Colors.transparent,
-                                fontSize: 0,
-                              ),
-                              errorBorder: outline,
-                              focusedErrorBorder: outline,
-                              enabledBorder:outline,
-                              focusedBorder:outline,
-                              label: const Text('Email ID',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                          ),
-                        ),
-                      ),
-                
-                      SizedBox(height: height * 0.013),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width:  width * 0.4,
-                            height: height * 0.07,
-                            child: TextFormField(
-                              controller: dob,
-                              readOnly: true,
-                              onTap: () { 
-                                setState(() {
-                                isdateselected=true;
-                                });
-                                selectDate(context, selectedDate);},
-                              // validator: (value) {
-                              //   if (value!.isEmpty) {
-                              //     return "Please Selected DOB";
-                              //   }
-                              //   return null;
-                              // },
-                              style: const TextStyle(color: Colors.black54),
-                              decoration: InputDecoration(
-                                  // filled: true,
-                                  // focusColor: const Color(0xffEFEFEF),
-                                  errorStyle: const TextStyle(
-                                    color: Colors.transparent,
-                                    fontSize: 0,
-                                  ),
-                                  // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                                  errorBorder: outline,
-                                  focusedErrorBorder: outline,
-                                  enabledBorder:outline,
-                                  focusedBorder:outline,
-                                  label: const Text('DOB',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: width * 0.08),
-                          SizedBox(
-                            width:  width * 0.4,
-                            height: height * 0.07,
-                            child:DropdownButtonFormField2(
-                              
-                              dropdownDecoration: BoxDecoration(
-                                borderRadius:BorderRadius.circular(25) ,
-                              ),
-                              focusColor: Colors.white,
-                              validator: (value) {
-                                if (selectedGender == null ) {
-                                  return "Please select Gender";
-                                }
-                                return null;
-                              },
-                              icon: const Padding(
-                                padding: EdgeInsets.only(bottom: 7,right: 8),
-                                child: Icon(Icons.keyboard_arrow_down),
-                              ),
-                              style: const TextStyle(color: Colors.black54),
-                              decoration:  InputDecoration(
-                                // contentPadding: ,
-                                //   contentPadding: const EdgeInsets.only(bottom: 18,left: 10),
-                                //   filled: true,
-                                //   focusColor: const Color(0xffEFEFEF),
-                                  errorStyle: const TextStyle(
-                                    color: Colors.transparent,
-                                    fontSize: 0,
-                                  ),
-                                  errorBorder: outline,
-                                  focusedErrorBorder: outline,
-                                  enabledBorder:outline,
-                                  focusedBorder:outline,
-                                  label: const Text('Gender*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                
-                              ),
-                              selectedItemBuilder: (BuildContext context) {
-                                return genderList.map<Widget>((Gender item) {
-                                  return Text(item.gender,
-                                      style: const TextStyle(color: Colors.black));
-                                }).toList();
-                              },
-                              items: genderList.map((Gender item) {
-                                return DropdownMenuItem<String>(
-                                  value: item.gender,
-                                  child: Text(
-                                    item.gender,
-                                    style: const TextStyle(fontSize: 13, color: Colors.black),
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (genderList) {
-                                setState(() {
-                                  selectedGender = genderList.toString();
-                                  genderType = genderList.toString();
-                                });
-                              },
-                
-                              value: selectedGender,
-                              isExpanded: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: height * 0.013),
-                      SizedBox(
-                        width:  width * 0.9,
-                        height: height * 0.07,
-                        child: TextFormField(
-                          textInputAction: TextInputAction.next,
-                          cursorColor: Colors.black,
-                          controller: age,
-                          keyboardType:TextInputType.streetAddress,
-                          validator: (value){
-                            if (value!.isEmpty) {
-                              return "Please enter Age*";
-                            }
-                            return null;
-                          },
-                
-                          style: const TextStyle(color: Colors.black54),
-                          decoration: InputDecoration(
-                            // filled: true,
-                            // focusColor: const Color(0xffEFEFEF),
-                            // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                              errorStyle: const TextStyle(
-                                color: Colors.transparent,
-                                fontSize: 0,
-                              ),
-                              errorBorder: outline,
-                              focusedErrorBorder: outline,
-                              enabledBorder:outline,
-                              focusedBorder:outline,
-                            
-                              label: const Text('Age*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: height * 0.013),
-                      SizedBox(
-                        width:  width * 0.9,
-                        height: height * 0.07,
-                        child: TextFormField(
-                          textInputAction: TextInputAction.next,
-                          cursorColor: Colors.black,
-                          controller: address,
-                          keyboardType:TextInputType.streetAddress,
-                          validator: (value){
-                            if (value!.isEmpty) {
-                              return "Please enter Valid Address";
-                            }
-                            return null;
-                          },
-                
-                          style: const TextStyle(color: Colors.black54),
-                          decoration: InputDecoration(
-                              // filled: true,
-                              // focusColor: const Color(0xffEFEFEF),
-                              // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                              errorStyle: const TextStyle(
-                                color: Colors.transparent,
-                                fontSize: 0,
-                              ),
-                              errorBorder: outline,
-                              focusedErrorBorder: outline,
-                              enabledBorder:outline,
-                              focusedBorder:outline,
-                              suffixIcon:  InkWell(
-                                onTap: () async {
-                                  _scrollIndicator( context, height, width);
-                                  var userLocation = await Geolocator.getCurrentPosition();
-                                  double lat= userLocation.latitude;
-                                  double log=userLocation.longitude;
-                                  List<Placemark> placeMarks = await placemarkFromCoordinates(lat,log);
-                                  Placemark place = placeMarks[0];
-                                  Placemark place2 = placeMarks[2];
-                                  Map<String,String> addressMap = {
-                                    "street":place2.subLocality.toString(),
-                                    "postalCode": place.postalCode.toString(),
-                                    "locality":place.locality.toString(),
-                                    "state":place2.administrativeArea.toString(),
-                                    "country":place2.country.toString()
-                                  };
-                                  var address = "${addressMap['street']!="" ? "${addressMap['street']}," : "" }${addressMap['locality']!="" ? "${addressMap['locality']}," : "" } ${addressMap['postalCode']!="" ? "${addressMap['postalCode']}," : "" } ${addressMap['state']!="" ? "${addressMap['state']}," : "" } ${addressMap['country']?? ""}";
-                                  var addData = '${place2.subLocality}, ${place.postalCode}, ${place.locality}, ${place2.administrativeArea}, ${place.country}';
-                                  Navigator.pop(context);
-                                  showDialog(
-                                      context: context,
-                                      barrierDismissible: true,
-                                      builder: (_) => setAddressPOPUP( context,height,width,address,addressMap)
-                                  );
-                                  referalfocuse.requestFocus();
-                
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Image.asset('assets/images/address_map.png',height: 23),
-                                ),
-                              ),
-                              label: const Text('Address*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: height * 0.013),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width:  width * 0.4,
-                            height: height * 0.07,
-                            child: TextFormField(
-                              textInputAction: TextInputAction.next,
-                              cursorColor: Colors.black,
-                              controller: area,
-                              style: const TextStyle(color: Colors.black54),
-                              textCapitalization: TextCapitalization.sentences,
-                              validator: (value){
-                                if (value!.isEmpty) {
-                                  return "Please enter Valid Area";
-                                }
-                                return null;
-                              },
-                              decoration: InputDecoration(
-                                  // filled: true,
-                                  // focusColor: const Color(0xffEFEFEF),
-                                  errorStyle: const TextStyle(
-                                    color: Colors.transparent,
-                                    fontSize: 0,
-                                  ),
-                                  // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                                  errorBorder: outline,
-                                  focusedErrorBorder: outline,
-                                  enabledBorder:outline,
-                                  focusedBorder:outline,
-                                  label: const Text('Area*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: width * 0.08),
-                          SizedBox(
-                            width:  width * 0.4,
-                            height: height * 0.07,
-                            child: TextFormField(
-                              onChanged: (value) {
-                                if(value.length==6){
-                                  fetchpin(value.toString());
-                                }
-                              },
-                              textInputAction: TextInputAction.next,
-                              cursorColor: Colors.black,
-                              focusNode: referalfocuse,
-                              controller: pincode,
-                              keyboardType: TextInputType.number,
-                              // maxLength: 6,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(6),
-                              ],
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return "Please enter pincode";
-                                }
-                                return null;
-                              },
-                              style: const TextStyle(color: Colors.black54),
-                              decoration: InputDecoration(
-                                  // filled: true,
-                                  // focusColor: const Color(0xffEFEFEF),
-                                  // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
-                                  errorStyle: const TextStyle(
-                                    color: Colors.transparent,
-                                    fontSize: 0,
-                                  ),
-                                  errorBorder: outline,
-                                  focusedErrorBorder: outline,
-                                  enabledBorder:outline,
-                                  
-                                  focusedBorder:outline,
-                                  label: const Text('Pincode*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                
-                      SizedBox(height: height * 0.013),
-                      SizedBox(
-                        width:  width * 0.9,
-                        height: height * 0.11,
-                        child: DropdownButtonFormField2(
-                          dropdownDecoration: BoxDecoration(
-                            borderRadius:BorderRadius.circular(25) ,
-                          ),
-                          focusColor: Colors.white,
-                          icon: const Padding(
-                            padding: EdgeInsets.only(bottom: 7,right: 8),
-                            child: Icon(Icons.keyboard_arrow_down),
-                          ),
-                          validator: (value) {
-                            if ( selectedReferral == null ) {
-                              return "Please select Referral";
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(color: Colors.black54),
-                          decoration:  InputDecoration(
-                            // contentPadding: ,
-                            //   contentPadding: const EdgeInsets.only(bottom: 18,left: 10),
-                            //   filled: true,
-                            //   focusColor: const Color(0xffEFEFEF),
-                              errorStyle: const TextStyle(
-                                color: Colors.transparent,
-                                fontSize: 0,
-                              ),
-                              errorBorder: outline,
-                              focusedErrorBorder: outline,
-                              enabledBorder:outline,
-                              focusedBorder:outline,
-                              label: const Text('Referal*',style: TextStyle(color: Colors.black54,fontSize: 14),)
-                
-                          ),
-                          selectedItemBuilder: (BuildContext context) {
-                            return referralList.map<Widget>((Referral item) {
-                              return Text(item.type,
-                                  style: const TextStyle(color: Colors.black));
-                            }).toList();
-                          },
-                          items: referralList.map((Referral item) {
-                            return DropdownMenuItem<String>(
-                              value: item.type,
-                              child: Text(
-                                item.type,
-                                style: const TextStyle(fontSize: 13, color: Colors.black),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (referralList) {
-                           
-                            setState(() {
-                              selectedReferral = referralList.toString();
-                              if(selectedReferral=="Self" ){
-                                setState(() {
-                                selectRefno=1;
-                                });
-                                print(selectRefno);
-                
-                              }
-                              if(selectedReferral=="Doctor"){
-                                setState(() {
-                                selectRefno=2;
-                                });
-                                print(selectRefno);
-                
-                              }else{
-                                // setState(() {
-                                // selectRefno=3;
-                                // });
-                                // print(selectRefno);
-                
-                              }
-                              col = Colors.black54;
-                              referralType = referralList.toString();
-                
-                              if (referralList == "Client") {
-                                Navigator.pushNamed(context, "SearchClientReferral").then((value) {
-                                  if (value != null){
-                                      if(value!=false){
-                                        Map<String,dynamic> data = value as Map<String,dynamic>;
-                                        print(data);
-                                   clientName.text = data['name'];
-                                   clintno=int.parse(data['id']);
-                                        print("physican No : $clintno");
-                                      }
-                                    print(value);
-                                  }
-                                });
-                              }
-                
-                            });
-                          },
-                
-                          // onChanged: (referralList) {
-                          //   setState(() {
-                          //     selectedReferral = referralList.toString();
-                          //   });
-                          //   if(referralList == "Doctor"){
-                          //     NavigateController.pagePush(context, const SearchReferralView(type: 'DOCTOR',));
-                          //
-                          //   }else{
-                          //     NavigateController.pagePush(context, const SearchReferralView(type: '',));
-                          //   }
-                          // },
-                          dropdownWidth: 160,
-                          value: selectedReferral,
-                          isExpanded: true,
-                        ),
-                      ),
-                      SizedBox(height: height * 0.019),
-                      Row(
-                        children: <Widget>[
-                          SizedBox(width: width * 0.06),
-                          const Text("Remark",
-                              style: TextStyle(color: Colors.black54,fontSize: 14))
-                        ],
-                      ),
-                      SizedBox(height: height * 0.002),
-                      SizedBox(
-                        width:  width * 0.9,
-                        child: TextFormField(
-                          textInputAction: TextInputAction.next,
-                          cursorColor: Colors.black,
-                          style: const TextStyle(color: Colors.black54),
-                          textAlign: TextAlign.start,
-                          maxLines: 2,
-                          decoration: InputDecoration(
-                              // filled: true,
-                              // focusColor: const Color(0xffEFEFEF),
-                            errorStyle: const TextStyle(
-                              color: Colors.transparent,
-                              fontSize: 0,
-                            ),
-                            errorBorder: outline,
-                            focusedErrorBorder: outline,
-                            enabledBorder:outline,
-                            focusedBorder:outline,
-                            ),
-                        ),
-                      ),
-                      SizedBox(height: height * 0.013),
-                      getReferralField(height,width),
-                      SizedBox(height: height * 0.013),
-                      InkWell(
-                        onTap:(){
-                           isfill();
-                        },
-                        child: Container(
-                          height: 40,
-                          width:120,
-                          decoration: BoxDecoration(
-                            color: CustomTheme.background_green,
-                            borderRadius: BorderRadius.circular(30)
-                          ),
-                          child: const Center(
-                            child: Text('Submit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: height * 0.04),
-                    ],
+                 
+                         SizedBox(
+                          width:  width * 0.6,
+                          height: height * 0.07,
+                          child: TextFormField(
+                      textInputAction: TextInputAction.next,
+                      cursorColor: Colors.black,
+                      controller: firstName,
+                      style: const TextStyle(color: Colors.black54),
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.words,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.allow(RegExp("[a-zA-Z ]")),
+                            ],
+                             validator: (value) {
+                   if (value == null || value.isEmpty) {
+                     return 'User Name is required';
+                   }
+                   return null;
+                 },
+                 
+                            decoration: InputDecoration(
+                     
+                  errorStyle: const TextStyle(
+                    color: Colors.transparent,
+                    fontSize: 0,
                   ),
-                ),
+                        errorBorder: outline,
+                        focusedErrorBorder: outline,
+                        enabledBorder:outline,
+                        focusedBorder:outline,
+                 
+                        label: const Text('First Name*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                      ),
+                          ),
+                        ),
+                 
+                       ],
+                     ),
+                   
+                     SizedBox(height: height * 0.013),
+                     SizedBox(
+                       width:  width * 0.9,
+                       height: height * 0.07,
+                       child: TextFormField(
+                         textInputAction: TextInputAction.next,
+                         cursorColor: Colors.black,
+                         controller: lastName,
+                         textCapitalization: TextCapitalization.words,
+                         inputFormatters: <TextInputFormatter>[
+                           FilteringTextInputFormatter.allow(RegExp("[a-zA-Z ]")),
+                         ],
+                         style: const TextStyle(color: Colors.black54),
+                         keyboardType: TextInputType.name,
+                      
+                         decoration: InputDecoration(
+                          
+                             errorStyle: const TextStyle(
+                               color: Colors.transparent,
+                               fontSize: 0,
+                             ),
+                             errorBorder: outline,
+                             focusedErrorBorder: outline,
+                             enabledBorder:outline,
+                             focusedBorder:outline,
+                             floatingLabelStyle:const TextStyle(color: Colors.black54,fontSize: 14),
+                             label: const Text('Last Name',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                         ),
+                       ),
+                     ),
+                 
+                     SizedBox(height: height * 0.013),
+                     SizedBox(
+                       width:  width * 0.9,
+                       height: height * 0.07,
+                       child: TextFormField(
+                         textInputAction: TextInputAction.next,
+                         cursorColor: Colors.black,
+                         controller: mobileNo,
+                         style: const TextStyle(color: Colors.black54),
+                         keyboardType: TextInputType.number,
+                         inputFormatters: [
+                           LengthLimitingTextInputFormatter(10),
+                         ],
+                         textCapitalization: TextCapitalization.sentences,
+                         validator: (value) {
+                   if (value == null || value.isEmpty ) {
+                     return 'Enter a valid 10-digit phone number';
+                   }
+                   return null;
+                 },
+                         decoration: InputDecoration(
+                        
+                             errorStyle: const TextStyle(
+                               color: Colors.transparent,
+                               fontSize: 0,
+                             ),
+                             errorBorder: outline,
+                             focusedErrorBorder: outline,
+                             enabledBorder:outline,
+                             focusedBorder:outline,
+                             label: const Text('Mobile No*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                         ),
+                       ),
+                     ),
+                     SizedBox(height: height * 0.013),
+                     SizedBox(
+                       width:  width * 0.9,
+                       height: height * 0.07,
+                       child: TextFormField(
+                         textInputAction: TextInputAction.next,
+                         cursorColor: Colors.black,
+                         controller: emailID,
+                         style: const TextStyle(color: Colors.black54),
+                         keyboardType: TextInputType.emailAddress,
+                         textCapitalization: TextCapitalization.sentences,
+                         onChanged: (value) {
+                         if (value.isNotEmpty&&
+                            ( !value.contains('@') ||
+                             !value.contains('.'))
+                             ) {
+                               setState(() {
+                                 emailerror=true;
+                               });
+                         }
+                         else{
+                           setState(() {
+                             emailerror=false;
+                           });
+                         }
+                       },
+                         decoration: InputDecoration(
+                             // filled: true,
+                             // focusColor: const Color(0xffEFEFEF),
+                             // contentPadding: const EdgeInsets.only(top: 4,left: 7),
+                             errorStyle: const TextStyle(
+                               color: Colors.transparent,
+                               fontSize: 0,
+                             ),
+                             errorBorder: outline,
+                             focusedErrorBorder: outline,
+                             enabledBorder:outline,
+                             focusedBorder:outline,
+                             label: const Text('Email ID',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                         ),
+                       ),
+                     ),
+                     emailerror?
+                     Column(
+                       children: [
+                         const SizedBox(height: 1,),
+                     const Align(
+                       alignment: Alignment.centerLeft,
+                       child: Text("            Enter a valid email address",style: TextStyle(color: Colors.red),)),
+                        SizedBox(height: height * 0.01),
+                         
+                       ],
+                     ):
+                     
+                 
+                     SizedBox(height: height * 0.013),
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                         SizedBox(
+                           width:  width * 0.4,
+                           height: height * 0.07,
+                           child: TextFormField(
+                             controller: dob,
+                             readOnly: true,
+                             onTap: () { 
+                               setState(() {
+                               isdateselected=true;
+                               });
+                               selectDate(context, selectedDate);},
+                             // validator: (value) {
+                             //   if (value!.isEmpty) {
+                             //     return "Please Selected DOB";
+                             //   }
+                             //   return null;
+                             // },
+                             style: const TextStyle(color: Colors.black54),
+                             decoration: InputDecoration(
+                                 // filled: true,
+                                 // focusColor: const Color(0xffEFEFEF),
+                                 errorStyle: const TextStyle(
+                                   color: Colors.transparent,
+                                   fontSize: 0,
+                                 ),
+                                 // contentPadding: const EdgeInsets.only(bottom: 4,left: 12),
+                                 errorBorder: outline,
+                                 focusedErrorBorder: outline,
+                                 enabledBorder:outline,
+                                 focusedBorder:outline,
+                                 label: const Text('DOB',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                             ),
+                           ),
+                         ),
+                         SizedBox(width: width * 0.08),
+                         SizedBox(
+                           width:  width * 0.4,
+                           height: height * 0.07,
+                           child:DropdownButtonFormField2(
+                             
+                             dropdownDecoration: BoxDecoration(
+                               borderRadius:BorderRadius.circular(25) ,
+                             ),
+                             focusColor: Colors.white,
+                             validator: (value) {
+                               if (selectedGender == null ) {
+                                 return "Please select Gender";
+                               }
+                               return null;
+                             },
+                             icon: const Padding(
+                               padding: EdgeInsets.only(bottom: 7,right: 8),
+                               child: Icon(Icons.keyboard_arrow_down),
+                             ),
+                             style: const TextStyle(color: Colors.black54),
+                             decoration:  InputDecoration(
+                        
+                                 errorStyle: const TextStyle(
+                                   color: Colors.transparent,
+                                   fontSize: 0,
+                                 ),
+                                 errorBorder: outline,
+                                 focusedErrorBorder: outline,
+                                 enabledBorder:outline,
+                                 focusedBorder:outline,
+                                 label: const Text('Gender*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                 
+                             ),
+                             selectedItemBuilder: (BuildContext context) {
+                               return genderList.map<Widget>((Gender item) {
+                                 return Text(item.gender,
+                                     style: const TextStyle(color: Colors.black));
+                               }).toList();
+                             },
+                             items: genderList.map((Gender item) {
+                               return DropdownMenuItem<String>(
+                                 value: item.gender,
+                                 child: Text(
+                                   item.gender,
+                                   style: const TextStyle(fontSize: 13, color: Colors.black),
+                                 ),
+                               );
+                             }).toList(),
+                             onChanged: (genderList) {
+                               setState(() {
+                                 selectedGender = genderList.toString();
+                                 genderType = genderList.toString();
+                               });
+                             },
+                 
+                             value: selectedGender,
+                             
+                             isExpanded: true,
+                           ),
+                         ),
+                       ],
+                     ),
+                     SizedBox(height: height * 0.013),
+                     SizedBox(
+                       width:  width * 0.9,
+                       height: height * 0.07,
+                       child: TextFormField(
+                         textInputAction: TextInputAction.next,
+                         cursorColor: Colors.black,
+                         controller: age,
+                         keyboardType:TextInputType.streetAddress,
+                         validator: (value){
+                           if (value!.isEmpty) {
+                             return "Please enter Age*";
+                           }
+                           return null;
+                         },
+                 
+                         style: const TextStyle(color: Colors.black54),
+                         decoration: InputDecoration(
+                         
+                             errorStyle: const TextStyle(
+                               color: Colors.transparent,
+                               fontSize: 0,
+                             ),
+                             errorBorder: outline,
+                             focusedErrorBorder: outline,
+                             enabledBorder:outline,
+                             focusedBorder:outline,
+                           
+                             label: const Text('Age*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                         ),
+                       ),
+                     ),
+                     SizedBox(height: height * 0.013),
+                     SizedBox(
+                       width:  width * 0.9,
+                       height: height * 0.07,
+                       child: TextFormField(
+                         textInputAction: TextInputAction.next,
+                         cursorColor: Colors.black,
+                         controller: address,
+                         keyboardType:TextInputType.streetAddress,
+                         validator: (value){
+                           if (value!.isEmpty) {
+                             return "Please enter Valid Address";
+                           }
+                           return null;
+                         },
+                 
+                         style: const TextStyle(color: Colors.black54),
+                         decoration: InputDecoration(
+                             errorStyle: const TextStyle(
+                               color: Colors.transparent,
+                               fontSize: 0,
+                             ),
+                             errorBorder: outline,
+                             focusedErrorBorder: outline,
+                             enabledBorder:outline,
+                             focusedBorder:outline,
+                             suffixIcon:  InkWell(
+                               onTap: () async {
+                                 _scrollIndicator( context, height, width);
+                                 var userLocation = await Geolocator.getCurrentPosition();
+                                 double lat= userLocation.latitude;
+                                 double log=userLocation.longitude;
+                                 List<Placemark> placeMarks = await placemarkFromCoordinates(lat,log);
+                                 Placemark place = placeMarks[0];
+                                 Placemark place2 = placeMarks[2];
+                                 Map<String,String> addressMap = {
+                                   "street":place2.subLocality.toString(),
+                                   "postalCode": place.postalCode.toString(),
+                                   "locality":place.locality.toString(),
+                                   "state":place2.administrativeArea.toString(),
+                                   "country":place2.country.toString()
+                                 };
+                                 var address = "${addressMap['street']!="" ? "${addressMap['street']}," : "" }${addressMap['locality']!="" ? "${addressMap['locality']}," : "" } ${addressMap['postalCode']!="" ? "${addressMap['postalCode']}," : "" } ${addressMap['state']!="" ? "${addressMap['state']}," : "" } ${addressMap['country']?? ""}";
+                                 var addData = '${place2.subLocality}, ${place.postalCode}, ${place.locality}, ${place2.administrativeArea}, ${place.country}';
+                                 Navigator.pop(context);
+                                 showDialog(
+                                     context: context,
+                                     barrierDismissible: true,
+                                     builder: (_) => setAddressPOPUP( context,height,width,address,addressMap)
+                                 );
+                                 referalfocuse.requestFocus();
+                 
+                               },
+                               child: Padding(
+                                 padding: const EdgeInsets.all(12.0),
+                                 child: Image.asset('assets/images/address_map.png',height: 23),
+                               ),
+                             ),
+                             label: const Text('Address*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                         ),
+                       ),
+                     ),
+                     SizedBox(height: height * 0.013),
+                     Row(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                         SizedBox(
+                           width:  width * 0.4,
+                           height: height * 0.07,
+                           child: TextFormField(
+                             textInputAction: TextInputAction.next,
+                             cursorColor: Colors.black,
+                             controller: area,
+                             style: const TextStyle(color: Colors.black54),
+                             textCapitalization: TextCapitalization.sentences,
+                             validator: (value){
+                               if (value!.isEmpty) {
+                                 return "Please enter Valid Area";
+                               }
+                               return null;
+                             },
+                             decoration: InputDecoration(
+                             
+                                 errorStyle: const TextStyle(
+                                   color: Colors.transparent,
+                                   fontSize: 0,
+                                 ),
+                                 errorBorder: outline,
+                                 focusedErrorBorder: outline,
+                                 enabledBorder:outline,
+                                 focusedBorder:outline,
+                                 label: const Text('Area*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                             ),
+                           ),
+                         ),
+                         SizedBox(width: width * 0.08),
+                         SizedBox(
+                           width:  width * 0.4,
+                           height: height * 0.07,
+                           child: TextFormField(
+                             onChanged: (value) {
+                               if(value.length==6){
+                                 fetchpin(value.toString());
+                               }
+                             },
+                             textInputAction: TextInputAction.next,
+                             cursorColor: Colors.black,
+                             focusNode: referalfocuse,
+                             controller: pincode,
+                             keyboardType: TextInputType.number,
+                             // maxLength: 6,
+                             inputFormatters: [
+                               LengthLimitingTextInputFormatter(6),
+                             ],
+                             validator: (value) {
+                               if (value!.isEmpty) {
+                                 return "Please enter pincode";
+                               }
+                               return null;
+                             },
+                             style: const TextStyle(color: Colors.black54),
+                             decoration: InputDecoration(
+                         
+                                 errorStyle: const TextStyle(
+                                   color: Colors.transparent,
+                                   fontSize: 0,
+                                 ),
+                                 errorBorder: outline,
+                                 focusedErrorBorder: outline,
+                                 enabledBorder:outline,
+                                 
+                                 focusedBorder:outline,
+                                 label: const Text('Pincode*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                             ),
+                           ),
+                         ),
+                       ],
+                     ),
+                 
+                     SizedBox(height: height * 0.013),
+                     SizedBox(
+                       width:  width * 0.9,
+                       height: height * 0.11,
+                       child: DropdownButtonFormField2(
+                         dropdownDecoration: BoxDecoration(
+                           borderRadius:BorderRadius.circular(25) ,
+                         ),
+                         focusColor: Colors.white,
+                         icon: const Padding(
+                           padding: EdgeInsets.only(bottom: 7,right: 8),
+                           child: Icon(Icons.keyboard_arrow_down),
+                         ),
+                         validator: (value) {
+                           if ( selectedReferral == null ) {
+                             return "Please select Referral";
+                           }
+                           return null;
+                         },
+                         style: const TextStyle(color: Colors.black54),
+                         decoration:  InputDecoration(
+                         
+                             errorStyle: const TextStyle(
+                               color: Colors.transparent,
+                               fontSize: 0,
+                             ),
+                             errorBorder: outline,
+                             focusedErrorBorder: outline,
+                             enabledBorder:outline,
+                             focusedBorder:outline,
+                             label: const Text('Referral*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+                 
+                         ),
+                         selectedItemBuilder: (BuildContext context) {
+                           return referralList.map<Widget>((Referral item) {
+                             return Text(item.type,
+                                 style: const TextStyle(color: Colors.black));
+                           }).toList();
+                         },
+                         items: referralList.map((Referral item) {
+                           return DropdownMenuItem<String>(
+                             value: item.type,
+                             child: Text(
+                               item.type,
+                               style: const TextStyle(fontSize: 13, color: Colors.black),
+                             ),
+                           );
+                         }).toList(),
+                         onChanged: (referralList) {
+                          
+                           setState(() {
+                             selectedReferral = referralList.toString();
+                             if(selectedReferral=="Self" ){
+                               setState(() {
+                                 doctorName.text ='';
+                                 physicianName='';
+                               selectRefno=1;
+                               });
+                               print(selectRefno);
+                 
+                             }
+                             if(selectedReferral=="Doctor"){
+                               setState(() {
+                               selectRefno=2;
+                               });
+                               print(selectRefno);
+                 
+                             }else{
+                               // setState(() {
+                               // selectRefno=3;
+                               // });
+                               // print(selectRefno);
+                 
+                             }
+                             col = Colors.black54;
+                             referralType = referralList.toString();
+                 
+                             if (referralList == "Client") {
+                               Navigator.pushNamed(context, "SearchClientReferral").then((value) {
+                                 if (value != null){
+                                     if(value!=false){
+                                       Map<String,dynamic> data = value as Map<String,dynamic>;
+                                       print(data);
+                                  clientName.text = data['name'];
+                                  clintno=int.parse(data['id']);
+                                       print("physican No : $clintno");
+                                     }
+                                   print(value);
+                                 }
+                               });
+                             }
+                           });
+                         },
+                         dropdownWidth: 160,
+                         value: selectedReferral,
+                         isExpanded: true,
+                       ),
+                     ),
+                     // SizedBox(height: height * 0.013),
+                     getReferralField(height,width),
+                     SizedBox(height: height * 0.013),
+                     Row(
+                       children: <Widget>[
+                         SizedBox(width: width * 0.06),
+                         const Text("Remark",
+                             style: TextStyle(color: Colors.black54,fontSize: 14))
+                       ],
+                     ),
+                     SizedBox(height: height * 0.002),
+                     SizedBox(
+                       width:  width * 0.9,
+                       child: TextFormField(
+                         textInputAction: TextInputAction.next,
+                         cursorColor: Colors.black,
+                         style: const TextStyle(color: Colors.black54),
+                         textAlign: TextAlign.start,
+                         maxLines: 2,
+                         decoration: InputDecoration(
+                      
+                           errorStyle: const TextStyle(
+                             color: Colors.transparent,
+                             fontSize: 0,
+                           ),
+                           errorBorder: outline,
+                           focusedErrorBorder: outline,
+                           enabledBorder:outline,
+                           focusedBorder:outline,
+                           ),
+                       ),
+                     ),
+                  
+                     SizedBox(height: height * 0.013),
+                     InkWell(
+                       onTap:(){ if (_formkey.currentState!.validate()) {
+                          isfill();
+                        //  showToast('Patient Added Successfully');
+                       }else{
+                         showToast('Please Fill All * Fields');
+                       }
+                       },
+                       child: Container(
+                         height: 40,
+                         width:120,
+                         decoration: BoxDecoration(
+                           color: CustomTheme.background_green,
+                           borderRadius: BorderRadius.circular(30)
+                         ),
+                         child: const Center(
+                           child: Text('Submit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+                         ),
+                       ),
+                     ),
+                     SizedBox(height: height * 0.05),
+                   ],
+                 ),
+               ),
+               ),
               ),
             ),
           ],
@@ -1237,53 +1191,51 @@ void isfill(){
   }
   getReferralField(height,width){
     switch(referralType){
-      case "Client":
-        return Column(
-          children: [
-            SizedBox(
-              width: width * 0.9,
-              height: height * 0.07,
-              child: TextFormField(
-                readOnly: true,
-                controller: clientName,
-                onTap: () {
-                  Navigator.pushNamed(context, "SearchClientReferral").then((value) {
-                    if (value != null){
+      // case "Client":
+      //   return Column(
+      //     children: [
+      //       SizedBox(
+      //         width: width * 0.9,
+      //         height: height * 0.07,
+      //         child: TextFormField(
+      //           readOnly: true,
+      //           controller: clientName,
+      //           onTap: () {
+      //             Navigator.pushNamed(context, "SearchClientReferral").then((value) {
+      //               if (value != null){
 
-                      Map<String,dynamic> data = value as Map<String,dynamic>;
-                      print(data);
-                      clientName.text = data['name'].toString();
-                      // physicanNo=int.parse(data['id']);
-                    clintno=int.parse(data['id']);
+      //                 Map<String,dynamic> data = value as Map<String,dynamic>;
+      //                 print(data);
+      //                 clientName.text = data['name'].toString();
+      //                 // physicanNo=int.parse(data['id']);
+      //               clintno=int.parse(data['id']);
 
-                      print(value);
-                      print(" the doctor name $physicanNo");
-                    }
-                  });
-                },
-                decoration: InputDecoration(
-                    // contentPadding: const EdgeInsets.only(bottom: 18,left: 10),
-                    // filled: true,
-                    // focusColor: const Color(0xffEFEFEF),
-                    errorStyle: const TextStyle(
-                      color: Colors.transparent,
-                      fontSize: 0,
-                    ),
-                    errorBorder: outline,
-                    focusedErrorBorder: outline,
-                    enabledBorder:outline,
-                    focusedBorder:outline,
-                    label: const Text('Client*',style: TextStyle(color: Colors.black54,fontSize: 14),)
+      //                 print(value);
+      //                 print(" the doctor name $physicanNo");
+      //               }
+      //             });
+      //           },
+      //           decoration: InputDecoration(
+             
+      //               errorStyle: const TextStyle(
+      //                 color: Colors.transparent,
+      //                 fontSize: 0,
+      //               ),
+      //               errorBorder: outline,
+      //               focusedErrorBorder: outline,
+      //               enabledBorder:outline,
+      //               focusedBorder:outline,
+      //               label: const Text('Client*',style: TextStyle(color: Colors.black54,fontSize: 14),)
 
-                ),
-              ),
-            ),
-            SizedBox(height: height * 0.013),
-            doctorField(width,height, "Doctor(Optional)",)
-          ],
-        );
+      //           ),
+      //         ),
+      //       ),
+      //       SizedBox(height: height * 0.013),
+      //       doctorField(width,height, "Doctor(Optional)",)
+      //     ],
+      //   );
       case "Doctor":
-        return doctorField(width,height, "Doctor");
+        return doctorField(width,height, "Doctor*");
       case "Self":
         return doctorField(width,height, "Doctor(Optional)");
       case '':
@@ -1320,6 +1272,8 @@ void isfill(){
                 children: [
                   InkWell(
                     onTap: (){
+                       BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+model.clearbookedtest();
                       //NavigateController.pagePush(context,    PatientDetailsView(screenType: 1, bookingType: "APP", bookingID: bookingID, data2:{}));
                       NavigateController.pagePush(context, PaymentView(bookingID: bookingID, ScreenType: 3, bookingType: 'NewBooking', nextpage:  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID:bookingID, regdate: regdate, ), ));
                       //NavigateController.pagePush(context,AppointmentView());
@@ -1332,6 +1286,8 @@ void isfill(){
                   SizedBox(width: width * 0.03),
                   InkWell(
                     onTap: (){
+                       BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+model.clearbookedtest();
                       NavigateController.pagePOP(context);
                       NavigateController.pagePOP(context);
                     },
@@ -1349,12 +1305,13 @@ void isfill(){
       ),
     );
   }
+
   Widget doctorField(width,height, String title) {
     return Column(
       children: [
         SizedBox(
           width: width * 0.9,
-          height: height * 0.07,
+          // height: height * 0.07,
           child: TextFormField(
             readOnly: true,
             controller: doctorName,

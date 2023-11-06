@@ -30,7 +30,7 @@ class AddToCartView extends StatefulWidget {
 }
 
 class _AddToCartViewState extends State<AddToCartView> {
-
+bool isemptty=false;
   String? userNo;
   bool isFetching = true;
   ScrollController control = ScrollController();
@@ -146,8 +146,12 @@ String latitude = "";
 if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse!.isNotEmpty) {
   patient = data!.lstPatientResponse![0];
 } else {
-  patient = null;
+  // setState(() {
+  //   isemptty=true;
+  // });
+
 }
+
     BookedServiceVM testCount = Provider.of<BookedServiceVM>(context);
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
@@ -230,6 +234,11 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
                       ],
                     ),
                   ),
+              //     isemptty?
+              // Container(
+              //  height: height-170,width: width,
+            
+              // child: Center(child: Text("Please select Test")),):
                   isFetching?
                     SizedBox(
                         height: height-170,width: width,

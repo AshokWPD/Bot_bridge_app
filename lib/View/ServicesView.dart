@@ -31,6 +31,7 @@ class ServicesListView extends StatefulWidget {
 }
 
 class _ServicesListViewState extends State<ServicesListView> {
+
   final ServiceDetailsVM _api = ServiceDetailsVM();
 
   final RefreshController _refreshController =
@@ -49,35 +50,19 @@ bool stoploading =false;
 
       });
     });
-
-
     LocalDB.getLDB("longitude").then((value) {
       setState(() {
         longitude =value;
        print(longitude);
       });
     });
-
   }
+ 
 
   @override
   void initState() {
     getData();
-    // TODO: implement initState
-    // Map<String, dynamic> params = {
-    //   "SearchType": widget.serviceType,
-    //   "ServiceNameSearch": widget.searchkey,
-    //   "venueNo": 1,
-    //   "venueBranchNo": 1,
-    //   "clientNo": 1,
-    //   "physicianNo": 0,
-    //   "serviceName": "",
-    //   "pageIndex": 1
-    // };
-    // if(widget.refID.isNotEmpty) {
-    //   params["CustomerID"] =widget.refID;
-    // }
-    // _api.fetchServiceDetails(params);
+ 
 
     fetchData(false);
     super.initState();
@@ -86,18 +71,27 @@ bool stoploading =false;
   fetchData(isNewPage) async{
     ServiceDetailsVM model =
     Provider.of<ServiceDetailsVM>(context, listen: false);
+    //  Map<String, dynamic> params = {
+    //   "SearchType": widget.serviceType,//widget.serviceType,
+    //   "serviceName": widget.searchkey,//widget.searchkey,
+    //   "clientNo": 0,
+    //   "physicianNo": 0,
+    //   "pageIndex": 0 //model.nextPage
+    // };
 
     Map<String, dynamic> params = {
-      "SearchType": model.getsearchkey,//widget.serviceType,
-      "serviceName": widget.serviceType,//widget.searchkey,
+      "servicetype": widget.serviceType,//widget.serviceType,
+      "serviceName": widget.searchkey,//widget.searchkey,
       "clientNo": 0,
       "physicianNo": 0,
-      "pageIndex": model.getNextPage //model.nextPage
+      "pageIndex": 1,
+        "venueNo": 1,
+  "venueBranchNo": 1, //model.nextPage
     };
-    print("pageIndex");
+    print("${model.getNextPage}");
     print(model.getNextPage);
     if (widget.refID.isNotEmpty) {
-      params["CustomerID"] = widget.refID;
+      // params["CustomerID"] = widget.refID;
     }
     if (isNewPage) {
       _api.fetchServiceDetailsNext(params, model);
@@ -109,7 +103,9 @@ bool stoploading =false;
 
   @override
   Widget build(BuildContext context) {
-    BookedServiceVM testCount = Provider.of<BookedServiceVM>(context);
+    // final selectedTestsProvider = Provider.of<SelectedTestsProvider>(context);
+
+    // BookedServiceVM testCount = Provider.of<BookedServiceVM>(context);
     final double height = MediaQuery.of(context).size.height;
     final double width = MediaQuery.of(context).size.width;
     return SafeArea(
@@ -133,17 +129,7 @@ bool stoploading =false;
                 controller: _refreshController,
                 enablePullDown: false,
                 enablePullUp: false,
-                onRefresh: () {},
-                // onLoading: () {
-                //   setState(() {
-                //     value = false;
-                //     page = viewModel.nextPage;
-                //   });
-                //   fetchData(true).then((value) {
-                //     print("load completed");
-                //     _refreshController.loadComplete();
-                //   });
-                // },
+             
                 child: ListView.builder(
                     // physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
@@ -491,18 +477,13 @@ bool stoploading =false;
     // Check if the test is already in selectedTests
     return addedTests.contains(test);
   }
-
-
     List<LstService> selectedTests = [];
-
-
   addService(List<LstService> data,index,height,width ) async {
   // final List<Map<String, dynamic>> newBookData = Provider.of<BookedServiceVM>(context, listen: false).getNewBookData;
 
 
     if (isTestSelected(data[index])) {
             test_alert( "Test Already Added!");
-
   }
   else{
       selectedTests.add(data[index]);
@@ -530,7 +511,7 @@ bool stoploading =false;
           "testCode": data[index].testCode,
           "testName": data[index].testName,
           "testType": data[index].testType,
-          "amount":data[index].amount,
+          "amount":  data[index].amount,
           "isFasting": true, // // isMyCart
           "remarks": ""
         };
@@ -613,3 +594,6 @@ NavigateController.pagePOP(context);
 
 
 }
+
+
+

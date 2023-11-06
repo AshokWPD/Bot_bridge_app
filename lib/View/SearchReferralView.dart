@@ -131,7 +131,7 @@ setState(() {
                         children: [
                           IconButton(onPressed: (){
                             Navigator.pop(context, false);
-                          }, icon: const Icon(Icons.arrow_back_ios,color: Colors.white,)),
+                          }, icon: const Icon(Icons.arrow_back_ios,color: Color.fromARGB(255, 0, 0, 0),)),
                           SizedBox(
                             width: width * 0.78,
                             height: height *0.07,
@@ -149,11 +149,11 @@ setState(() {
                                     contentPadding: const EdgeInsets.only(top: 4,left: 12),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(14),
-                                        borderSide: const BorderSide(color: Colors.white)
+                                        borderSide: const BorderSide(color: Colors.grey)
                                     ),
                                     focusedBorder:OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(14),
-                                        borderSide: const BorderSide(color: Colors.white)
+                                        borderSide: const BorderSide(color: Color.fromARGB(255, 0, 0, 0))
                                     ),
                                     hintText: 'Search'
                                 ),

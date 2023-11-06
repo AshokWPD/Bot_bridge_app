@@ -178,7 +178,12 @@ bool isNumber(String input) {
           child: Scaffold(
             backgroundColor: const Color(0xffEFEFEF),
             body:
-            SingleChildScrollView(
+            WillPopScope(
+               onWillPop: ()async {
+            print("working-----------------------");
+                 FocusScope.of(context).unfocus();
+          NavigateController.pagePushLikePop(context,  const HomeView());
+         return false;  },
               child: Column(
                 children: [
                   SizedBox(
@@ -231,11 +236,11 @@ bool isNumber(String input) {
                                       contentPadding: const EdgeInsets.only(top: 4,left: 13),
                                       enabledBorder: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(14),
-                                          borderSide: const BorderSide(color: Colors.white,width: 2)
+                                          borderSide:  BorderSide(color: CustomTheme.background_green,width: 2)
                                       ),
                                       focusedBorder:OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(14),
-                                          borderSide: const BorderSide(color: Colors.white,width: 2)
+                                          borderSide:  BorderSide(color: CustomTheme.background_green,width: 2)
                                       ),
                                       hintText: 'Search'
                                   ),
@@ -245,18 +250,18 @@ bool isNumber(String input) {
                               GestureDetector(
                                   onTap:
                                    () async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2023, 1, 1),
-      lastDate: DateTime(2023, 12, 31),
-       builder: (context, child) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),
-            child: Theme(
+                final DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate ?? DateTime.now(),
+                  firstDate: DateTime(2023, 1, 1),
+                  lastDate: DateTime(2023, 12, 31),
+                   builder: (context, child) {
+                      return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),
+              child: Theme(
               data: ThemeData.light().copyWith(
                 primaryColor: CustomTheme.circle_green,
-
+            
                 buttonTheme:
                 const ButtonThemeData(textTheme: ButtonTextTheme.primary),
                 colorScheme:  ColorScheme.light(primary: CustomTheme.circle_green)
@@ -266,360 +271,363 @@ bool isNumber(String input) {
                         borderRadius: BorderRadius.all(Radius.circular(16)))),
               ),
               child: child!,
-            ),
-          );
-        }
-    );
-
-    if (pickedDate != null && pickedDate != selectedDate) {
-      fetchData();
-
-      setState(() {
-        dateshow=true;
-        mobileshow=false;
-        allshow=false;
-        selectedDate = pickedDate;
-        print(selectedDate);
-        filterdate = dateformat.format(selectedDate).toString();
-fetchData();
-     print(filterdate);
-    //  _lastTestDetails(filterdate);
-
-      });
-    }
-  },
-                                  child: Image.asset('assets/images/calender.png',height: height*0.044))
+              ),
+                      );
+                    }
+                );
+            
+                if (pickedDate != null && pickedDate != selectedDate) {
+                  fetchData();
+            
+                  setState(() {
+                    dateshow=true;
+                    mobileshow=false;
+                    allshow=false;
+                    selectedDate = pickedDate;
+                    print(selectedDate);
+                    filterdate = dateformat.format(selectedDate).toString();
+            fetchData();
+                 print(filterdate);
+                //  _lastTestDetails(filterdate);
+            
+                  });
+                }
+              },
+                                  child: Image.asset('assets/images/calender.png',color: CustomTheme.background_green,height: height*0.05))
                             ],
                           ),
                         ],
                       )),
-                      nodata?
-            Container(
-             height: height-170,width: width,
-
-              child: Center(child: Text("Somthing went wrong")),):
-                    isFetching?
-                     Container(
-                      height: height-170,width: width,
-                      child: Center(child: CircularProgressIndicator())):                   // Container(
-           
-                              SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    Flex(
-                                      direction: Axis.vertical,
-                                      children: [
-                                        //////////////////////////////////////////////////////////////
-                                        
-
-                                        mobileshow?
-                                        ListView.builder(
-                                          itemCount: _filteredData!.length,
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemBuilder: (BuildContext context, int index) {
-                                            var item = _filteredData![index];
-                                            return InkWell(
-                                              onTap: (){
-                                                NavigateController.pagePush(context, PatientDetailsView(screenType: 2, bookingType: bookingType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
-                                              },
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
-                                                child: Container(
-                                                  height: height * 0.145,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      borderRadius: BorderRadius.circular(17)
-                                                  ),
-                                                  child: Stack(
-                                                    children: [
-                                                      Positioned(
-                                                          right:width * 0.0,
-                                                          bottom: height * 0.0,
-                                                          child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
-                                                      ),
-                                                      Positioned(
-                                                        bottom: height * 0.012,
-                                                        right:width * 0.02 ,
-                                                        child: Text(
-                                                          item.isPaid == true ? "PAID" : "UNPAID",
-                                                          style: const TextStyle(
-                                                              color: Colors.white,
-                                                              fontWeight: FontWeight.w500,
-                                                              fontSize: 11),
-                                                        ),),
-                                                      Positioned(
-                                                        left:width * 0.03,
-                                                        top: height * 0.03,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          children:  [
-                                                            const CircleAvatar(
-                                                              backgroundColor:  Color(0xffEFEFEF),
-                                                              radius: 27,
-                                                              backgroundImage: AssetImage('assets/images/profile.png'),),
-                                                            SizedBox(
-                                                              height: height * 0.005,
-                                                            ),
-                                                            const Text("Confirm",style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600),)
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Positioned(
-                                                        left:width * 0.21,
-                                                        top: height * 0.02,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children:  [
-                                                            Row(
-                                                              children:  [
-                                                                Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298),fontWeight: FontWeight.w600),overflow: TextOverflow.ellipsis),
-                                                                Text(" ${item.age!.replaceAll('Y', "")}, ${item.gender == "Male" ? "Male" : "Female" }",style:  const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: height * 0.01,
-                                                            ),
-                                                            SizedBox(
-                                                                width: width * 0.6,
-                                                                child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                                                            SizedBox(
-                                                              height: height * 0.01,
-                                                            ),
-                                                            Text(
-                                                              "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
-                                                              // "${VM.lstPatientResponse![index].registeredDateTime}"
-                                                                  ""
-                                                              ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                            // Text("${VM.lstPatientResponse![index].registeredDateTime},${VM.lstPatientResponse![index].fromSlot}",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-
-                                              ),
-                                            );
-                                          },
-
-                                        ):
-
-                                          dateshow?
-
-                                        ListView.builder(
-                                       itemCount: _lastTestDetails!.where((item) =>
-              formatDateString(item.registeredDateTime.toString(), desiredDateFormat)  == filterdate)
-            .length,
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemBuilder: (BuildContext context, int index) {
-                                            var item = _lastTestDetails!.where((item) =>
-              formatDateString(item.registeredDateTime.toString(), desiredDateFormat)  == filterdate)
-              .toList()[index];
-                                            return InkWell(
-                                              onTap: (){
-                                                NavigateController.pagePush(context, PatientDetailsView(screenType: 2, bookingType: bookingType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
-                                              },
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
-                                                child: Container(
-                                                  height: height * 0.145,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      borderRadius: BorderRadius.circular(17)
-                                                  ),
-                                                  child: Stack(
-                                                    children: [
-                                                      Positioned(
-                                                          right:width * 0.0,
-                                                          bottom: height * 0.0,
-                                                          child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
-                                                      ),
-                                                      Positioned(
-                                                        bottom: height * 0.012,
-                                                        right:width * 0.02 ,
-                                                        child: Text(
-                                                          item.isPaid == true ? "PAID" : "UNPAID",
-                                                          style: const TextStyle(
-                                                              color: Colors.white,
-                                                              fontWeight: FontWeight.w500,
-                                                              fontSize: 11),
-                                                        ),),
-                                                      Positioned(
-                                                        left:width * 0.03,
-                                                        top: height * 0.03,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          children:  [
-                                                            const CircleAvatar(
-                                                              backgroundColor:  Color(0xffEFEFEF),
-                                                              radius: 27,
-                                                              backgroundImage: AssetImage('assets/images/profile.png'),),
-                                                            SizedBox(
-                                                              height: height * 0.005,
-                                                            ),
-                                                            const Text("Confirm",style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600),)
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Positioned(
-                                                        left:width * 0.21,
-                                                        top: height * 0.02,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children:  [
-                                                            Row(
-                                                              children:  [
-                                                                Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298),fontWeight: FontWeight.w600),overflow: TextOverflow.ellipsis),
-                                                                Text(" ${item.age!.replaceAll('Y', "")}, ${item.gender == "Male" ? "Male" : "Female" }",style:  const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: height * 0.01,
-                                                            ),
-                                                            SizedBox(
-                                                                width: width * 0.6,
-                                                                child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                                                            SizedBox(
-                                                              height: height * 0.01,
-                                                            ),
-                                                            Text(
-                                                              "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
-                                                              // "${VM.lstPatientResponse![index].registeredDateTime}"
-                                                                  ""
-                                                              ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                            // Text("${VM.lstPatientResponse![index].registeredDateTime},${VM.lstPatientResponse![index].fromSlot}",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-
-                                              ),
-                                            );
-                                          },
-
-                                        )
-:
-                                        const Text("No data in the selected date"),
-                                   
-                                   allshow?
-                                       ListView.builder(
-                                          itemCount: _lastTestDetails!.length,
-                                          shrinkWrap: true,
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemBuilder: (BuildContext context, int index) {
-                                            var item = _lastTestDetails![index];
-                                            return InkWell(
-                                              onTap: (){
-                                                NavigateController.pagePush(context, PatientDetailsView(screenType: 2, bookingType: bookingType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
-                                              },
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
-                                                child: Container(
-                                                  height: height * 0.145,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      borderRadius: BorderRadius.circular(17)
-                                                  ),
-                                                  child: Stack(
-                                                    children: [
-                                                      Positioned(
-                                                          right:width * 0.0,
-                                                          bottom: height * 0.0,
-                                                          child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
-                                                      ),
-                                                      Positioned(
-                                                        bottom: height * 0.012,
-                                                        right:width * 0.02 ,
-                                                        child: Text(
-                                                          item.isPaid == true ? "PAID" : "UNPAID",
-                                                          style: const TextStyle(
-                                                              color: Colors.white,
-                                                              fontWeight: FontWeight.w500,
-                                                              fontSize: 11),
-                                                        ),),
-                                                      Positioned(
-                                                        left:width * 0.03,
-                                                        top: height * 0.03,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          children:  [
-                                                            const CircleAvatar(
-                                                              backgroundColor:  Color(0xffEFEFEF),
-                                                              radius: 27,
-                                                              backgroundImage: AssetImage('assets/images/profile.png'),),
-                                                            SizedBox(
-                                                              height: height * 0.005,
-                                                            ),
-                                                            const Text("Confirm",style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600),)
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Positioned(
-                                                        left:width * 0.21,
-                                                        top: height * 0.02,
-                                                        child: Column(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children:  [
-                                                            Row(
-                                                              children:  [
-                                                                Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298),fontWeight: FontWeight.w600),overflow: TextOverflow.ellipsis),
-                                                                Text(" ${item.age!.replaceAll('Y', "")}, ${item.gender == "Male" ? "Male" : "Female" }",style:  const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
-                                                              ],
-                                                            ),
-                                                            SizedBox(
-                                                              height: height * 0.01,
-                                                            ),
-                                                            SizedBox(
-                                                                width: width * 0.6,
-                                                                child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                                                            SizedBox(
-                                                              height: height * 0.01,
-                                                            ),
-                                                            Text(
-                                                              "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
-                                                              // "${VM.lstPatientResponse![index].registeredDateTime}"
-                                                                  ""
-                                                              ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                            // Text("${VM.lstPatientResponse![index].registeredDateTime},${VM.lstPatientResponse![index].fromSlot}",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                          ],
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-
-                                              ),
-                                            );
-                                          },
-
-                                        )
-
-                                        :
-
-
-                                   iserror?const Center(child: Text("No Records found!!!")):
-
-                                   const Text(" Here Record in the Selected Date"),
-
-                                  
+                      Expanded(
+                        child: nodata?
+                                  Container(
+                                   height: height-170,width: width,
+                      
+                                  child: Center(child: Text("Somthing went wrong")),):
+                                        isFetching?
+                                         Container(
+                        height: height-170,width: width,
+                        child: Center(child: CircularProgressIndicator())):                   // Container(
                                  
-                                        
-                                      ],
-                                    ),
-                                    SizedBox(height: height * 0.04,),
-                                  ],
+                                SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      Flex(
+                                        direction: Axis.vertical,
+                                        children: [
+                                          //////////////////////////////////////////////////////////////
+                                          
+                      
+                                          mobileshow?
+                                          ListView.builder(
+                                            itemCount: _filteredData!.length,
+                                            shrinkWrap: true,
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            itemBuilder: (BuildContext context, int index) {
+                                              var item = _filteredData![index];
+                                              return InkWell(
+                                                onTap: (){
+                                                  NavigateController.pagePush(context, PatientDetailsView(screenType: 2, bookingType: bookingType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
+                                                  child: Container(
+                                                    height: height * 0.145,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius.circular(17)
+                                                    ),
+                                                    child: Stack(
+                                                      children: [
+                                                        Positioned(
+                                                            right:width * 0.0,
+                                                            bottom: height * 0.0,
+                                                            child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
+                                                        ),
+                                                        Positioned(
+                                                          bottom: height * 0.012,
+                                                          right:width * 0.02 ,
+                                                          child: Text(
+                                                            item.isPaid == true ? "PAID" : "UNPAID",
+                                                            style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                                fontSize: 11),
+                                                          ),),
+                                                        Positioned(
+                                                          left:width * 0.03,
+                                                          top: height * 0.03,
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children:  [
+                                                              const CircleAvatar(
+                                                                backgroundColor:  Color(0xffEFEFEF),
+                                                                radius: 27,
+                                                                backgroundImage: AssetImage('assets/images/profile.png'),),
+                                                              SizedBox(
+                                                                height: height * 0.005,
+                                                              ),
+                                                              const Text("Confirm",style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600),)
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left:width * 0.21,
+                                                          top: height * 0.02,
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children:  [
+                                                              Row(
+                                                                children:  [
+                                                                  Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298),fontWeight: FontWeight.w600),overflow: TextOverflow.ellipsis),
+                                                                  Text(" ${item.age!.replaceAll('Y', "")}, ${item.gender == "Male" ? "Male" : "Female" }",style:  const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
+                                                                ],
+                                                              ),
+                                                              SizedBox(
+                                                                height: height * 0.01,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: width * 0.6,
+                                                                  child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                                                              SizedBox(
+                                                                height: height * 0.01,
+                                                              ),
+                                                              Text(
+                                                                "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
+                                                                // "${VM.lstPatientResponse![index].registeredDateTime}"
+                                                                    ""
+                                                                ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                              // Text("${VM.lstPatientResponse![index].registeredDateTime},${VM.lstPatientResponse![index].fromSlot}",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                      
+                                                ),
+                                              );
+                                            },
+                      
+                                          ):
+                      
+                                            dateshow?
+                      
+                                          ListView.builder(
+                                         itemCount: _lastTestDetails!.where((item) =>
+                                  formatDateString(item.registeredDateTime.toString(), desiredDateFormat)  == filterdate)
+                                  .length,
+                                            shrinkWrap: true,
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            itemBuilder: (BuildContext context, int index) {
+                                              var item = _lastTestDetails!.where((item) =>
+                                  formatDateString(item.registeredDateTime.toString(), desiredDateFormat)  == filterdate)
+                                  .toList()[index];
+                                              return InkWell(
+                                                onTap: (){
+                                                  NavigateController.pagePush(context, PatientDetailsView(screenType: 2, bookingType: bookingType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
+                                                  child: Container(
+                                                    height: height * 0.145,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius.circular(17)
+                                                    ),
+                                                    child: Stack(
+                                                      children: [
+                                                        Positioned(
+                                                            right:width * 0.0,
+                                                            bottom: height * 0.0,
+                                                            child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
+                                                        ),
+                                                        Positioned(
+                                                          bottom: height * 0.012,
+                                                          right:width * 0.02 ,
+                                                          child: Text(
+                                                            item.isPaid == true ? "PAID" : "UNPAID",
+                                                            style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                                fontSize: 11),
+                                                          ),),
+                                                        Positioned(
+                                                          left:width * 0.03,
+                                                          top: height * 0.03,
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children:  [
+                                                              const CircleAvatar(
+                                                                backgroundColor:  Color(0xffEFEFEF),
+                                                                radius: 27,
+                                                                backgroundImage: AssetImage('assets/images/profile.png'),),
+                                                              SizedBox(
+                                                                height: height * 0.005,
+                                                              ),
+                                                              const Text("Confirm",style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600),)
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left:width * 0.21,
+                                                          top: height * 0.02,
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children:  [
+                                                              Row(
+                                                                children:  [
+                                                                  Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298),fontWeight: FontWeight.w600),overflow: TextOverflow.ellipsis),
+                                                                  Text(" ${item.age!.replaceAll('Y', "")}, ${item.gender == "Male" ? "Male" : "Female" }",style:  const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
+                                                                ],
+                                                              ),
+                                                              SizedBox(
+                                                                height: height * 0.01,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: width * 0.6,
+                                                                  child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                                                              SizedBox(
+                                                                height: height * 0.01,
+                                                              ),
+                                                              Text(
+                                                                "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
+                                                                // "${VM.lstPatientResponse![index].registeredDateTime}"
+                                                                    ""
+                                                                ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                              // Text("${VM.lstPatientResponse![index].registeredDateTime},${VM.lstPatientResponse![index].fromSlot}",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                      
+                                                ),
+                                              );
+                                            },
+                      
+                                          )
+                      :
+                                          const Text("No data in the selected date"),
+                                     
+                                     allshow?
+                                         ListView.builder(
+                                            itemCount: _lastTestDetails!.length,
+                                            shrinkWrap: true,
+                                            physics: const NeverScrollableScrollPhysics(),
+                                            itemBuilder: (BuildContext context, int index) {
+                                              var item = _lastTestDetails![index];
+                                              return InkWell(
+                                                onTap: (){
+                                                  NavigateController.pagePush(context, PatientDetailsView(screenType: 2, bookingType: bookingType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
+                                                  child: Container(
+                                                    height: height * 0.145,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius.circular(17)
+                                                    ),
+                                                    child: Stack(
+                                                      children: [
+                                                        Positioned(
+                                                            right:width * 0.0,
+                                                            bottom: height * 0.0,
+                                                            child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
+                                                        ),
+                                                        Positioned(
+                                                          bottom: height * 0.012,
+                                                          right:width * 0.02 ,
+                                                          child: Text(
+                                                            item.isPaid == true ? "PAID" : "UNPAID",
+                                                            style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                                fontSize: 11),
+                                                          ),),
+                                                        Positioned(
+                                                          left:width * 0.03,
+                                                          top: height * 0.03,
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children:  [
+                                                              const CircleAvatar(
+                                                                backgroundColor:  Color(0xffEFEFEF),
+                                                                radius: 27,
+                                                                backgroundImage: AssetImage('assets/images/profile.png'),),
+                                                              SizedBox(
+                                                                height: height * 0.005,
+                                                              ),
+                                                              const Text("Confirm",style: TextStyle(color: Colors.green,fontWeight: FontWeight.w600),)
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          left:width * 0.21,
+                                                          top: height * 0.02,
+                                                          child: Column(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children:  [
+                                                              Row(
+                                                                children:  [
+                                                                  Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298),fontWeight: FontWeight.w600),overflow: TextOverflow.ellipsis),
+                                                                  Text(" ${item.age!.replaceAll('Y', "")}, ${item.gender == "Male" ? "Male" : "Female" }",style:  const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
+                                                                ],
+                                                              ),
+                                                              SizedBox(
+                                                                height: height * 0.01,
+                                                              ),
+                                                              SizedBox(
+                                                                  width: width * 0.6,
+                                                                  child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                                                              SizedBox(
+                                                                height: height * 0.01,
+                                                              ),
+                                                              Text(
+                                                                "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
+                                                                // "${VM.lstPatientResponse![index].registeredDateTime}"
+                                                                    ""
+                                                                ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                              // Text("${VM.lstPatientResponse![index].registeredDateTime},${VM.lstPatientResponse![index].fromSlot}",style: TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                      
+                                                ),
+                                              );
+                                            },
+                      
+                                          )
+                      
+                                          :
+                      
+                      
+                                     iserror?const Center(child: Text("No Records found!!!")):
+                      
+                                     const Text(" Here Record in the Selected Date"),
+                      
+                                    
+                                   
+                                          
+                                        ],
+                                      ),
+                                      SizedBox(height: height * 0.04,),
+                                    ],
+                                  ),
                                 ),
-                              )
-
+                      )
+            
                           // default:
- ])))));
+             ]),
+            ))));
   }
               
 }

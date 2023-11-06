@@ -6,6 +6,7 @@ import 'package:botbridge_green/MainData.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,14 +23,20 @@ class AddPrescriptionView extends StatefulWidget {
   final String booktype;
   final String regdate;
 
-  const AddPrescriptionView({Key? key, required this.bookingID, required this.screenType, required this.booktype, required this.regdate}) : super(key: key);
+  const AddPrescriptionView({
+    Key? key,
+    required this.bookingID,
+    required this.screenType,
+    required this.booktype,
+    required this.regdate,
+  }) : super(key: key);
 
   @override
   _AddPrescriptionViewState createState() => _AddPrescriptionViewState();
 }
 
 class _AddPrescriptionViewState extends State<AddPrescriptionView> {
-  final ImagePicker pickImage = ImagePicker();
+ final ImagePicker pickImage = ImagePicker();
   List<XFile>? selectedImages = [];
   List<String> _selectedImagePaths = [];
   bool showSubmitButton = false;
@@ -42,18 +49,29 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
   }
 
   Future<void> _loadSelectedImagePaths() async {
-    final prefs = await SharedPreferences.getInstance();
-    final _bookingID = prefs.getString('bookingID');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String>? storedImagePaths = prefs.getStringList('${widget.bookingID}selectedImagePaths');
 
-    if (widget.bookingID == _bookingID) {
-      final storedImagePaths = prefs.getStringList('${widget.bookingID}selectedImagePaths');
-      if (storedImagePaths != null) {
-        setState(() {
-          _selectedImagePaths = storedImagePaths;
-        });
-      }
+    if (storedImagePaths != null) {
+      setState(() {
+        _selectedImagePaths = storedImagePaths;
+      });
     }
   }
+
+  String? _getImageType(String imagePath) {
+    final List<String> parts = imagePath.split('.');
+    if (parts.length > 1) {
+      return parts.last;
+    }
+    return null;
+  }
+
+Future<void> _updateStoredImagePaths() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setStringList('${widget.bookingID}selectedImagePaths', _selectedImagePaths);
+}
+
 
   Future<void> captureImage() async {
     final XFile? capturedImage = await pickImage.pickImage(source: ImageSource.camera);
@@ -79,16 +97,17 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
   }
 
 
-  void processImages(List<XFile> images) async {
-    List<Map<String, dynamic>> imageList = [];
 
-    setState(() {
-      _selectedImagePaths = images.map((image) => image.path).toList();
-    });
 
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setStringList('${widget.bookingID}selectedImagePaths', _selectedImagePaths);
-    prefs.setString('bookingID', widget.bookingID);
+void processImages(List<XFile> images) async {
+   List<Map<String, dynamic>> imageList = [];
+
+    // setState(() {
+    //   _selectedImagePaths.addAll(images.map((image) => image.path));
+    // });
+
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // prefs.setStringList('${widget.bookingID}selectedImagePaths', _selectedImagePaths);
 
     for (final image in images) {
       File _image = File(image.path);
@@ -105,41 +124,85 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
       };
 
       imageList.add(imageMap);
+            _selectedImagePaths.add(image.path); // Add the new image path
+
     }
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList('${widget.bookingID}selectedImagePaths', _selectedImagePaths);
 
-    Map<String, dynamic> params = {
-      "bookingID": widget.bookingID,
-      "venueNo": MainData.tenantNo,
-      "venueBranchNo": MainData.tenantBranchNo,
-      "prescriptionImglst": imageList,
-    };
+  Map<String, dynamic> params = {
+    "bookingID": widget.bookingID,
+    "venueNo": MainData.tenantNo,
+    "venueBranchNo": MainData.tenantBranchNo,
+    "prescriptionImglst": imageList,
+  };
 
+  await uploadImagesToServer(params);
+
+  // Fluttertoast.showToast(
+  //   msg: "Uploaded..",
+  //   toastLength: Toast.LENGTH_SHORT,
+  //   gravity: ToastGravity.BOTTOM,
+  //   timeInSecForIosWeb: 1,
+  //   backgroundColor: Colors.black45,
+  //   textColor: Colors.white,
+  //   fontSize: 14.0,
+  // );
+
+  setState(() {
+    showSubmitButton = true;
+    uploaded = true;
+  });
+}
+
+
+Future<void> uploadImagesToServer(Map<String, dynamic> params) async {
     ApiClient().fetchData(ServerURL().getUrl(RequestType.UploadPrescription), params).then((value) {
       Fluttertoast.showToast(
-        msg: "Uploaded..",
+        msg: "Uploaded Successfully",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.black45,
         textColor: Colors.white,
         fontSize: 14.0,
-      );
+      );});
+}
 
-      setState(() {
-        selectedImages = images;
-      });
-    });
-     setState(() {
-      showSubmitButton = true;
-      uploaded = true;
-    });
-  }
- 
-   void uploadImages() {
+
+  void uploadImages() {
     if (selectedImages != null && selectedImages!.isNotEmpty) {
       processImages(selectedImages!);
-      // You can initiate the API upload here
     }
+  }
+
+  void openSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              leading: Icon(Icons.camera),
+              title: Text('Capture Image'),
+              onTap: () {
+                Navigator.pop(context);
+                captureImage();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo),
+              title: Text('Select Image'),
+              onTap: () {
+                Navigator.pop(context);
+                selectImages();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -152,13 +215,12 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
         backgroundColor: const Color(0xffEFEFEF),
         body: WillPopScope(
           onWillPop: () async {
-            // Handle back navigation here
-            return true; // Change this to your desired behavior
+ NavigateController.pagePushLikePop(context, PatientDetailsView(screenType: widget.screenType, bookingType: widget.booktype, bookingID: widget.bookingID, regdate: widget.regdate,));            return true; // Change this to your desired behavior
           },
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Container(
+                                Container(
                   height: height * 0.07,
                   width: width,
                   decoration: BoxDecoration(
@@ -190,6 +252,7 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
                   ),
                 ),
                 SizedBox(height: height * 0.02),
+
                 // Display previously selected images here
                 if (_selectedImagePaths.isNotEmpty)
                   Flex(
@@ -212,7 +275,29 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
                                   File(_selectedImagePaths[index]),
                                   fit: BoxFit.cover,
                                 ),
-                                // ... Your existing code for delete button
+                                 Align(
+                  alignment: Alignment.topRight,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedImagePaths.removeAt(index);
+                      });
+                      if (_selectedImagePaths.isEmpty) {
+                        setState(() {
+                          showSubmitButton = false;
+                        });
+                      }
+                      _updateStoredImagePaths(); // Update stored image paths
+                    },
+                    child: const CircleAvatar(
+                      radius: 12,
+                      backgroundColor: Colors.redAccent,
+                      child: Center(
+                        child: Icon(Icons.clear, size: 15, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
                               ],
                             ),
                           );
@@ -220,6 +305,7 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
                       ),
                     ],
                   ),
+
                 // Display newly selected images
                 if (selectedImages != null && selectedImages!.isNotEmpty && !uploaded)
                   Flex(
@@ -264,39 +350,60 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
                                     ),
                                   ),
                                 ),
-                                // Align(
-                                //   alignment: Alignment.bottomCenter,
-                                //   child: SizedBox(
-                                //     height: height / 20,
-                                //     child: const Center(child: Text("Image")),
-                                //   ),
-                                // ),
-                              ],
+ Align(
+                  alignment: Alignment.topRight,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedImagePaths.removeAt(index);
+                      });
+                      if (_selectedImagePaths.isEmpty) {
+                        setState(() {
+                          showSubmitButton = false;
+                        });
+                      }
+                      _updateStoredImagePaths(); // Update stored image paths
+                    },
+                    child: const CircleAvatar(
+                      radius: 12,
+                      backgroundColor: Colors.redAccent,
+                      child: Center(
+                        child: Icon(Icons.clear, size: 15, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),                              ],
                             ),
                           );
                         },
                       ),
                     ],
                   ),
+
                 // "Submit" Button
-                if (showSubmitButton)
-                  Container(
-                    color: Colors.white,
-                    padding: EdgeInsets.all(16.0),
-                    child: InkWell(
-                      onTap: () {
-                        uploadImages();
-                      },
-                      child: Container(
+               // "Submit" Button
+if (showSubmitButton && !uploaded)
+  Container(
+    color: Colors.white,
+    padding: EdgeInsets.all(16.0),
+    child: InkWell(
+      onTap: () {
+        uploadImages();
+      },
+      child: Container(
         height: 40,
         width: 120,
         decoration: BoxDecoration(
-            color: CustomTheme.background_green,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: const [
-              BoxShadow(
-                  color: Colors.black26, offset: Offset(1, 2), blurRadius: 6)
-            ]),
+          color: CustomTheme.background_green,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(1, 2),
+              blurRadius: 6,
+            ),
+          ],
+        ),
         child: const Center(
           child: Text(
             'Submit',
@@ -304,29 +411,34 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
           ),
         ),
       ),
-                    ),
-                  ),
-                // Add Image Button
-                if (!uploaded)
-                  Container(
-                    padding: EdgeInsets.all(16.0),
-                    child: InkWell(
-                      onTap: openSheet,
-                      child: Container(
+    ),
+  ),
+
+// Add Image Button
+if (!uploaded)
+  Container(
+    padding: EdgeInsets.all(16.0),
+    child: InkWell(
+      onTap: openSheet,
+      child: Container(
         height: 40,
         width: 120,
         decoration: BoxDecoration(
-            color: CustomTheme.background_green,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: const [
-              BoxShadow(
-                  color: Colors.black26, offset: Offset(1, 2), blurRadius: 6)
-            ]),
-        child:  Center(
+          color: CustomTheme.background_green,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              offset: Offset(1, 2),
+              blurRadius: 6,
+            ),
+          ],
+        ),
+        child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-    Image.asset('assets/images/add_appointment.png',height: height*0.02,),
+              Image.asset('assets/images/add_appointment.png', height: height * 0.02),
               Text(
                 'Image',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
@@ -335,49 +447,14 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
           ),
         ),
       ),
-                    ),
-                  ),
+    ),
+  ),
+
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  void openSheet() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.camera),
-              title: Text('Capture Image'),
-              onTap: () {
-                Navigator.pop(context);
-                captureImage();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.photo),
-              title: Text('Select Image'),
-              onTap: () {
-                Navigator.pop(context);
-                selectImages();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-   String? _getImageType(String imagePath) {
-    final List<String> parts = imagePath.split('.');
-    if (parts.length > 1) {
-      return parts.last;
-    }
-    return null;
   }
 }

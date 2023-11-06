@@ -94,14 +94,16 @@ class _SearchTestsState extends State<SearchTests> with TickerProviderStateMixin
                               Provider.of<ServiceDetailsVM>(context, listen: false);
 
                               Map<String, dynamic> params = {
-                                "SearchType": "",
-                                "serviceName": searchtestController.text,
-                                "clientNo": 0,
-                                "physicianNo": 0,
-                                "pageIndex": 1
-                              };
+      "servicetype": '',//widget.serviceType,
+      "serviceName": searchtestController.text,//widget.searchkey,
+      "clientNo": 0,
+      "physicianNo": 0,
+      "pageIndex": 1,
+        "venueNo": 1,
+  "venueBranchNo": 1, //model.nextPage
+    };
                               if (widget.referalID.isNotEmpty) {
-                                params["CustomerID"] = widget.referalID;
+                                // params["CustomerID"] = widget.referalID;
                               }
 
                               api.fetchServiceDetails(params, model,searchtestController.text);
@@ -168,9 +170,9 @@ class _SearchTestsState extends State<SearchTests> with TickerProviderStateMixin
                     controller: tabController,
                       children: [
                         ServicesListView(serviceType: '', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
-                        ServicesListView(serviceType: "PRO", BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
-                        ServicesListView(serviceType: 'TEST', BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
-                        ServicesListView(serviceType: 'GRP', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text)
+                        ServicesListView(serviceType: "P", BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
+                        ServicesListView(serviceType: 'T', BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
+                        ServicesListView(serviceType: 'G', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text)
                   ]),
                 )
               ],

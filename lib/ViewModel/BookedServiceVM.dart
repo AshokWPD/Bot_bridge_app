@@ -37,6 +37,11 @@ class BookedServiceVM extends ChangeNotifier{
   set addTestForNewBook(data){
     NewBookData.add(data);
   }
+  void clearbookedtest(){
+    print(NewBookData);
+    NewBookData.clear();
+    print("************success***********");
+  }
 
   Future<void> fetchBookedService(Map<String,dynamic> params,BookedServiceVM model,bool isNewBook) async {
     if(isNewBook){
