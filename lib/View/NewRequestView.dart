@@ -254,7 +254,7 @@ bool isNumber(String input) {
                   context: context,
                   initialDate: selectedDate ?? DateTime.now(),
                   firstDate: DateTime(2023, 1, 1),
-                  lastDate: DateTime(2023, 12, 31),
+                  lastDate: DateTime.now(),
                    builder: (context, child) {
                       return Padding(
               padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),
@@ -300,14 +300,14 @@ bool isNumber(String input) {
                       )),
                       Expanded(
                         child: nodata?
-                                  Container(
+                                  SizedBox(
                                    height: height-170,width: width,
                       
-                                  child: Center(child: Text("Somthing went wrong")),):
+                                  child: const Center(child: Text("Somthing went wrong")),):
                                         isFetching?
-                                         Container(
+                                         SizedBox(
                         height: height-170,width: width,
-                        child: Center(child: CircularProgressIndicator())):                   // Container(
+                        child: const Center(child: CircularProgressIndicator())):                   // Container(
                                  
                                 SingleChildScrollView(
                                   child: Column(

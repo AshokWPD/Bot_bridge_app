@@ -37,7 +37,7 @@ class AddPrescriptionView extends StatefulWidget {
 
 class _AddPrescriptionViewState extends State<AddPrescriptionView> {
  final ImagePicker pickImage = ImagePicker();
-  List<XFile>? selectedImages = [];
+  List<XFile> selectedImages = [];
   List<String> _selectedImagePaths = [];
   bool showSubmitButton = false;
   bool uploaded = false;
@@ -70,7 +70,10 @@ class _AddPrescriptionViewState extends State<AddPrescriptionView> {
 Future<void> _updateStoredImagePaths() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setStringList('${widget.bookingID}selectedImagePaths', _selectedImagePaths);
+
 }
+
+
 
 
   Future<void> captureImage() async {
@@ -138,16 +141,6 @@ void processImages(List<XFile> images) async {
   };
 
   await uploadImagesToServer(params);
-
-  // Fluttertoast.showToast(
-  //   msg: "Uploaded..",
-  //   toastLength: Toast.LENGTH_SHORT,
-  //   gravity: ToastGravity.BOTTOM,
-  //   timeInSecForIosWeb: 1,
-  //   backgroundColor: Colors.black45,
-  //   textColor: Colors.white,
-  //   fontSize: 14.0,
-  // );
 
   setState(() {
     showSubmitButton = true;
@@ -271,24 +264,41 @@ Future<void> uploadImagesToServer(Map<String, dynamic> params) async {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                Image.file(
-                                  File(_selectedImagePaths[index]),
-                                  fit: BoxFit.cover,
+                                Container(
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [BoxShadow(color: Colors.green,offset: Offset(5, 5),blurRadius: 10,blurStyle:BlurStyle.solid )]
+                                  ),
+                                  child: Image.file(
+                                    File(_selectedImagePaths[index]),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                                  Align(
                   alignment: Alignment.topRight,
                   child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedImagePaths.removeAt(index);
-                      });
-                      if (_selectedImagePaths.isEmpty) {
-                        setState(() {
-                          showSubmitButton = false;
-                        });
-                      }
-                      _updateStoredImagePaths(); // Update stored image paths
-                    },
+                     onTap: () {
+      setState(() {
+        if (index < _selectedImagePaths.length) {
+          _selectedImagePaths.removeAt(index);
+        }
+
+        if (selectedImages != null && index < selectedImages!.length) {
+          selectedImages!.removeAt(index);
+        }
+
+        print("this is the button ------------");
+      });
+
+      if (_selectedImagePaths.isEmpty && (selectedImages == null || selectedImages!.isEmpty)) {
+        setState(() {
+          showSubmitButton = false;
+        });
+      }
+
+      _updateStoredImagePaths(); // Update stored image paths
+    },
                     child: const CircleAvatar(
                       radius: 12,
                       backgroundColor: Colors.redAccent,
@@ -324,23 +334,41 @@ Future<void> uploadImagesToServer(Map<String, dynamic> params) async {
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
-                                Image.file(
-                                  File(selectedImages![index].path),
-                                  fit: BoxFit.cover,
+                                Container(
+                                  clipBehavior: Clip.antiAlias,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [BoxShadow(color: Colors.green,offset: Offset(5, 5),blurRadius: 10,blurStyle:BlurStyle.solid )]
+                                  ),
+                                  child: Image.file(
+                                    File(selectedImages![index].path),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                                 Align(
                                   alignment: Alignment.topRight,
                                   child: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedImages!.removeAt(index);
-                                      });
-                                      if (selectedImages!.isEmpty) {
-                                        setState(() {
-                                          showSubmitButton = false;
-                                        });
-                                      }
-                                    },
+                                     onTap: () {
+      setState(() {
+        if (index < _selectedImagePaths.length) {
+          _selectedImagePaths.removeAt(index);
+        }
+
+        if (selectedImages != null && index < selectedImages!.length) {
+          selectedImages!.removeAt(index);
+        }
+
+        print("this is the button ------------");
+      });
+
+      if (_selectedImagePaths.isEmpty && (selectedImages == null || selectedImages!.isEmpty)) {
+        setState(() {
+          showSubmitButton = false;
+        });
+      }
+
+      _updateStoredImagePaths(); // Update stored image paths
+    },
                                     child: const CircleAvatar(
                                       radius: 12,
                                       backgroundColor: Colors.redAccent,
@@ -353,17 +381,27 @@ Future<void> uploadImagesToServer(Map<String, dynamic> params) async {
  Align(
                   alignment: Alignment.topRight,
                   child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedImagePaths.removeAt(index);
-                      });
-                      if (_selectedImagePaths.isEmpty) {
-                        setState(() {
-                          showSubmitButton = false;
-                        });
-                      }
-                      _updateStoredImagePaths(); // Update stored image paths
-                    },
+                     onTap: () {
+      setState(() {
+        if (index < _selectedImagePaths.length) {
+          _selectedImagePaths.removeAt(index);
+        }
+
+        if (selectedImages != null && index < selectedImages!.length) {
+          selectedImages!.removeAt(index);
+        }
+
+        print("this is the button ------------");
+      });
+
+      if (_selectedImagePaths.isEmpty && (selectedImages == null || selectedImages!.isEmpty)) {
+        setState(() {
+          showSubmitButton = false;
+        });
+      }
+
+      _updateStoredImagePaths(); // Update stored image paths
+    },
                     child: const CircleAvatar(
                       radius: 12,
                       backgroundColor: Colors.redAccent,

@@ -268,7 +268,7 @@ bool isNumber(String input) {
                 context: context,
                 initialDate: selectedDate ?? DateTime.now(),
                 firstDate: DateTime(2023, 1, 1),
-                lastDate: DateTime(2023, 12, 31),
+                lastDate: DateTime.now(),
                  builder: (context, child) {
                     return Padding(
               padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),

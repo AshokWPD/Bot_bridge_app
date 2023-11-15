@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:botbridge_green/Model/Response/AppoitmentAndRequestData.dart';
 import 'package:botbridge_green/Model/ServerURL.dart';
-import 'package:botbridge_green/View/NewBookingView.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

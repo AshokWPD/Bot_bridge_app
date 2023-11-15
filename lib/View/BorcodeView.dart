@@ -5,7 +5,6 @@ import 'package:botbridge_green/View/Helper/ErrorPopUp.dart';
 import 'package:botbridge_green/View/HomeView.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';

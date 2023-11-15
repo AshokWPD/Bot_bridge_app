@@ -4,8 +4,6 @@ import 'package:botbridge_green/Model/ServerURL.dart';
 import 'package:botbridge_green/Utils/NavigateController.dart';
 import 'package:botbridge_green/View/HomeView.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
-import 'package:botbridge_green/View/ServicesView.dart';
-import 'package:botbridge_green/View/TabbarView.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +13,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Model/ApiClient.dart';
 import '../Utils/LocalDB.dart';
 import '../ViewModel/BookedServiceVM.dart';
@@ -23,6 +20,7 @@ import 'AddToCartView.dart';
 import 'Helper/ThemeCard.dart';
 import 'PaymentView.dart';
 import 'package:http/http.dart'as http;
+
 
 
 class NewBookingView extends StatefulWidget {
@@ -58,17 +56,19 @@ FocusNode referalfocuse = FocusNode();
   final scaffoldkey = GlobalKey<ScaffoldState>();
   late Color col = Colors.white;
   String genderType='';
-    String titleType = "";
+  String titleType = "";
   String referralType = "";
   int physicanNo=0;
   String physicianName='';
-    int clintno=0;
+  int clintno=0;
   bool isSelf = false;
   bool isDoctor = false;
   bool isClient = false;
   bool isClicked = false;
+  bool iscompleted=false;
   String txtdate='';
-bool emailerror=false;
+  bool emailerror=false;
+  bool ageerror=false;
   GoogleMapController? mapController;
   Set<Marker> markers = {};
   final Completer<GoogleMapController> _controller = Completer();
@@ -244,7 +244,6 @@ txtdate=dateformatnow.format(DateTime.now()).toString();
             area.text = firstPostOffice['Name'];
          address.text = "${firstPostOffice['District']},${firstPostOffice['State']}";
         // firstPostOffice['State'];
-          
         });
         // String name = firstPostOffice['Name'];
         // String district = firstPostOffice['District'];
@@ -352,8 +351,7 @@ String userNo='2';
   }
 
 void isfill(){
-  if(
-    // titleType.isEmpty&&
+  if( ageerror!=true&&
       firstName.text.isNotEmpty&&
       selectedTitle!.isNotEmpty&&
       mobileNo.text.isNotEmpty&&
@@ -413,8 +411,8 @@ void isfill(){
                       child: InkWell(
                           onTap: (){
                             NavigateController.pagePOP(context);
-                           BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
-      model.clearbookedtest();
+      //                      BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+      // model.clearbookedtest();
                           },
                           child: const Icon(Icons.arrow_back_ios,color: Colors.white,)),
                     ),
@@ -502,7 +500,7 @@ void isfill(){
                        children: [
                          // SizedBox(width: width * 0.08),
                          SizedBox(
-                           width:  width * 0.3,
+                           width:  width * 0.35,
                            height: height * 0.07,
                            child:DropdownButtonFormField2(
                              dropdownDecoration: BoxDecoration(
@@ -564,7 +562,7 @@ void isfill(){
                          ),
                  
                          SizedBox(
-                          width:  width * 0.6,
+                          width:  width * 0.55,
                           height: height * 0.07,
                           child: TextFormField(
                       textInputAction: TextInputAction.next,
@@ -675,24 +673,38 @@ void isfill(){
                          textInputAction: TextInputAction.next,
                          cursorColor: Colors.black,
                          controller: emailID,
+                         
                          style: const TextStyle(color: Colors.black54),
                          keyboardType: TextInputType.emailAddress,
                          textCapitalization: TextCapitalization.sentences,
-                         onChanged: (value) {
-                         if (value.isNotEmpty&&
-                            ( !value.contains('@') ||
-                             !value.contains('.'))
-                             ) {
-                               setState(() {
-                                 emailerror=true;
-                               });
-                         }
-                         else{
-                           setState(() {
-                             emailerror=false;
-                           });
-                         }
-                       },
+                        onChanged: (value) {
+  // Remove spaces and convert to lowercase
+  String formattedText = value.replaceAll(' ', '').toLowerCase();
+  
+  // Check for email format
+  if (formattedText.isNotEmpty &&
+      (!formattedText.contains('@') ||
+       !formattedText.contains('.'))
+  ) {
+    setState(() {
+      emailerror = true;
+    });
+  } else {
+    setState(() {
+      emailerror = false;
+    });
+  }
+
+  // Update the text field
+  emailID.value = emailID.value.copyWith(
+    text: formattedText,
+    selection: TextSelection.fromPosition(
+      TextPosition(offset: formattedText.length),
+    ),
+    composing: TextRange.empty,
+  );
+},
+
                          decoration: InputDecoration(
                              // filled: true,
                              // focusColor: const Color(0xffEFEFEF),
@@ -831,7 +843,19 @@ void isfill(){
                          textInputAction: TextInputAction.next,
                          cursorColor: Colors.black,
                          controller: age,
-                         keyboardType:TextInputType.streetAddress,
+                         keyboardType:TextInputType.number,
+                         onChanged: (value) {
+                          if(int.parse(value) >=121){
+                            setState(() {
+                              ageerror=true;
+                              
+                            });
+                            
+                          }else{ setState(() {
+                              ageerror=false;
+                              
+                            });}
+                         },
                          validator: (value){
                            if (value!.isEmpty) {
                              return "Please enter Age*";
@@ -850,12 +874,14 @@ void isfill(){
                              focusedErrorBorder: outline,
                              enabledBorder:outline,
                              focusedBorder:outline,
+                             
                            
                              label: const Text('Age*',style: TextStyle(color: Colors.black54,fontSize: 14),)
                          ),
                        ),
                      ),
                      SizedBox(height: height * 0.013),
+                     ageerror?const Text("Please enter valid age",style: TextStyle(color: Colors.red),):const SizedBox(),
                      SizedBox(
                        width:  width * 0.9,
                        height: height * 0.07,
@@ -1126,6 +1152,47 @@ void isfill(){
                      ),
                   
                      SizedBox(height: height * 0.013),
+                     iscompleted?Column(
+                      children: [
+                        RichText(
+                         text: TextSpan(
+                           text: 'The  ',style: const TextStyle(color: Colors.black),
+                          //  style: DefaultTextStyle.of(context).style,
+                           children: <TextSpan>[
+                             TextSpan(
+                               text: "${firstName.text}'s",
+                               style: TextStyle(
+                                 color: CustomTheme.background_green,
+                                 fontWeight: FontWeight.bold // Set your desired color here
+                                 // Add any other styling properties for the first name here
+                               ),
+                             ),
+                             const TextSpan(
+                               text: ' Test is Added!',
+                             ),
+                           ],
+                         ),
+                       ),
+                        SizedBox(height: height * 0.02),
+                        InkWell(
+                       onTap:(){ 
+                       NavigateController.pageReplace(context, const NewBookingView());
+                       },
+                       child: Container(
+                         height: 40,
+                         width:120,
+                         decoration: BoxDecoration(
+                           color: CustomTheme.background_green,
+                           borderRadius: BorderRadius.circular(30)
+                         ),
+                         child: const Center(
+                           child: Text('Add New Booking',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600),),
+                         ),
+                       ),
+                     ),
+                      ],
+                     ):const SizedBox(),
+                     iscompleted?const SizedBox():
                      InkWell(
                        onTap:(){ if (_formkey.currentState!.validate()) {
                           isfill();
@@ -1272,10 +1339,14 @@ void isfill(){
                 children: [
                   InkWell(
                     onTap: (){
-                       BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
-model.clearbookedtest();
+//                        BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+// model.clearbookedtest();
                       //NavigateController.pagePush(context,    PatientDetailsView(screenType: 1, bookingType: "APP", bookingID: bookingID, data2:{}));
                       NavigateController.pagePush(context, PaymentView(bookingID: bookingID, ScreenType: 3, bookingType: 'NewBooking', nextpage:  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID:bookingID, regdate: regdate, ), ));
+
+                      setState(() {
+                        iscompleted=true;
+                      });
                       //NavigateController.pagePush(context,AppointmentView());
 
                     },
@@ -1286,10 +1357,13 @@ model.clearbookedtest();
                   SizedBox(width: width * 0.03),
                   InkWell(
                     onTap: (){
-                       BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
-model.clearbookedtest();
+//                        BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+// model.clearbookedtest();
                       NavigateController.pagePOP(context);
-                      NavigateController.pagePOP(context);
+                        setState(() {
+                        iscompleted=true;
+                      });
+                      // NavigateController.pagePOP(context);
                     },
                     child: const Center(
                       child: Text( "Back",style: TextStyle(color: Colors.black54,fontSize: 15),),
@@ -1489,8 +1563,8 @@ model.clearbookedtest();
         // helpText: "DOB",
         initialDate: selectedDate1,
         initialEntryMode: DatePickerEntryMode.calendarOnly,
-        firstDate: DateTime(1980, 8),
-        lastDate: DateTime(2031),
+        firstDate: DateTime(1960, 8),
+        lastDate: DateTime.now(),
         builder: (context, child) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),
