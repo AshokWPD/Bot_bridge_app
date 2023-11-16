@@ -1154,25 +1154,25 @@ void isfill(){
                      SizedBox(height: height * 0.013),
                      iscompleted?Column(
                       children: [
-                        RichText(
-                         text: TextSpan(
-                           text: 'The  ',style: const TextStyle(color: Colors.black),
-                          //  style: DefaultTextStyle.of(context).style,
-                           children: <TextSpan>[
-                             TextSpan(
-                               text: "${firstName.text}'s",
-                               style: TextStyle(
-                                 color: CustomTheme.background_green,
-                                 fontWeight: FontWeight.bold // Set your desired color here
-                                 // Add any other styling properties for the first name here
-                               ),
-                             ),
-                             const TextSpan(
-                               text: ' Test is Added!',
-                             ),
-                           ],
-                         ),
-                       ),
+                      //   RichText(
+                      //    text: TextSpan(
+                      //      text: 'The  ',style: const TextStyle(color: Colors.black),
+                      //     //  style: DefaultTextStyle.of(context).style,
+                      //      children: <TextSpan>[
+                      //        TextSpan(
+                      //          text: "${firstName.text}'s",
+                      //          style: TextStyle(
+                      //            color: CustomTheme.background_green,
+                      //            fontWeight: FontWeight.bold // Set your desired color here
+                      //            // Add any other styling properties for the first name here
+                      //          ),
+                      //        ),
+                      //        const TextSpan(
+                      //          text: ' Test is Added!',
+                      //        ),
+                      //      ],
+                      //    ),
+                      //  ),
                         SizedBox(height: height * 0.02),
                         InkWell(
                        onTap:(){ 
@@ -1342,7 +1342,7 @@ void isfill(){
 //                        BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
 // model.clearbookedtest();
                       //NavigateController.pagePush(context,    PatientDetailsView(screenType: 1, bookingType: "APP", bookingID: bookingID, data2:{}));
-                      NavigateController.pagePush(context, PaymentView(bookingID: bookingID, ScreenType: 3, bookingType: 'NewBooking', nextpage:  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID:bookingID, regdate: regdate, ), ));
+                      NavigateController.pagePush(context, PaymentView(bookingID: bookingID, ScreenType: 3, bookingType: 'APP', nextpage:  PatientDetailsView(screenType: 1, bookingType: 'APP', bookingID:bookingID, regdate: regdate, ), ));
 
                       setState(() {
                         iscompleted=true;
