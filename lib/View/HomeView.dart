@@ -160,9 +160,9 @@ model.clearbookedtest();
                                     //       child: Lottie.asset('assets/images/new_appoitment.json',
                                     //
                                     //         fit: BoxFit.fill,),
-                                    //     ))
+                                    //     )) 
                                     SizedBox(
-                                      width: width * 0.30,
+                                      width: width * 0.35,
                                       height: height * 0.04,
                                       child: ElevatedButton( 
                                         style: ButtonStyle(
@@ -186,9 +186,9 @@ model.clearbookedtest();
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Image.asset('assets/images/add_appointment.png',height: height*0.02,),
+                                            Image.asset('assets/images/add_appointment.png',height: height*0.018,),
                                             SizedBox(width: width * 0.016,),
-                                            const Text('New Booking',style: TextStyle(color: Colors.white,fontSize: 10,fontWeight: FontWeight.w600),),
+                                             Text('New Booking',style: TextStyle(color: Colors.white,fontSize:width*0.026,fontWeight: FontWeight.w600),),
                                           ],
                                         ),
                                       )

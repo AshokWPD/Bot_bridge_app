@@ -662,9 +662,8 @@ final width = MediaQuery.of(context).size.width;
                               // viewModel.getAddToCart.data!.lstCartDetailsGet!.isEmpty ? Center(child: Image.asset("assets/images/empty_box.png",height: 170,),) :
 
                               }
-                            
-                
 
+                              
   String getReferral(String type){
     switch (type) {
       case "0": //"SF"
@@ -910,6 +909,7 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
         isupdated=true;
         isclick=false;
       });
+
       print("latesturl $url");
       print("latestresponse $response");
       if(response["status"]==1){

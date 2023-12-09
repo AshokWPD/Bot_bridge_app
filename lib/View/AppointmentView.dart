@@ -12,8 +12,7 @@ import '../Model/Status.dart';
 import '../Utils/NavigateController.dart';
 import '../ViewModel/AppointmentListVM.dart';
 import 'Helper/ThemeCard.dart';
-import 'package:http/http.dart'as http;
-
+import 'package:http/http.dart' as http;
 
 class AppointmentView extends StatefulWidget {
   const AppointmentView({super.key});
@@ -26,38 +25,37 @@ class AppointmentView extends StatefulWidget {
 }
 
 class _AppointmentViewState extends State<AppointmentView> {
-  String BookinType = "APP" ;
+  String BookinType = "APP";
   bool isFetching = true;
   bool isSearchbar = true;
-  int userno=0;
+  int userno = 0;
   DateTime selectedDate = DateTime.now();
-    DateTime currentdate = DateTime.now();
+  DateTime currentdate = DateTime.now();
 
-  List<LstPatientResponse>? _lastTestDetails=[];
-    List<LstPatientResponse>? _filteredData=[]; // Store the list of patients here
+  List<LstPatientResponse>? _lastTestDetails = [];
+  List<LstPatientResponse>? _filteredData =
+      []; // Store the list of patients here
   // List<LstPatientResponse>? _filtere_dated; // Store the list of patients here
- // Store the list of patients here
+  // Store the list of patients here
   DateFormat dateformat = DateFormat('dd-MM-yyyy');
-String filterdate="";
-bool iserror=false;
-final bool _calendefil=true;
-bool allshow =true;
-bool mobileshow=false;
-bool dateshow=false;
-bool nodata=false;
-var searchdate;
-   DateTime? picked ;
- 
-
-
+  String filterdate = "";
+  bool iserror = false;
+  final bool _calendefil = true;
+  bool allshow = true;
+  bool mobileshow = false;
+  bool dateshow = false;
+  bool nodata = false;
+  var searchdate;
+  DateTime? picked;
 
   // Define a method to fetch data and update the list
   Future<void> fetchData() async {
-     var venueNo = await LocalDB.getLDB("venueNo") ?? "";
+    var venueNo = await LocalDB.getLDB("venueNo") ?? "";
     var venueBranchNo = await LocalDB.getLDB("venueBranchNo") ?? "";
     var userno = await LocalDB.getLDB("userID") ?? "";
 
-    final url = Uri.parse(ServerURL().getUrl(RequestType.LoadAppointment)); // Replace with your API endpoint
+    final url = Uri.parse(ServerURL()
+        .getUrl(RequestType.LoadAppointment)); // Replace with your API endpoint
     final headers = {'Content-Type': 'application/json'};
     final requestBody = jsonEncode({
       "bookingID": "",
@@ -72,564 +70,857 @@ var searchdate;
     final response = await http.post(url, headers: headers, body: requestBody);
 
     if (response.statusCode == 200) {
-    final jsonResponse = jsonDecode(response.body);
-    print(jsonResponse);
+      final jsonResponse = jsonDecode(response.body);
+      print(jsonResponse);
 
-    final data = AppointmentAndRequestData.fromJson(jsonResponse);
-    final lastTestDetails = data.lstPatientResponse;
+      final data = AppointmentAndRequestData.fromJson(jsonResponse);
+      final lastTestDetails = data.lstPatientResponse;
 
-    if (lastTestDetails != null) {
-      setState(() {
-        _lastTestDetails = lastTestDetails;
-        isFetching = false;
-      });
+      if (lastTestDetails != null) {
+        setState(() {
+          _lastTestDetails = lastTestDetails;
+          isFetching = false;
+        });
+      } else {
+        nodata = true;
+        // Handle the case when the data is null
+        setState(() {
+          isFetching = false;
+          iserror = true;
+        });
+      }
     } else {
-nodata=true;
-      // Handle the case when the data is null
-      setState(() {
-        isFetching = false;
-        iserror = true;
-      });
+      // Handle the case when the API call fails
+      throw Exception('Failed to load data');
     }
-  } else {
-    // Handle the case when the API call fails
-    throw Exception('Failed to load data');
   }
-}
 
-bool usenumber=false;
+  bool usenumber = false;
 
+  String formatDateString(String inputDateString, String desiredDateFormat) {
+    // Parse the input date string into a DateTime object
+    DateTime inputDate = DateTime.parse(inputDateString);
 
-String formatDateString(String inputDateString, String desiredDateFormat) {
-  // Parse the input date string into a DateTime object
-  DateTime inputDate = DateTime.parse(inputDateString);
+    // Format the date as per the desired format and return it as a string
+    String formattedDate = DateFormat(desiredDateFormat).format(inputDate);
 
-  // Format the date as per the desired format and return it as a string
-  String formattedDate = DateFormat(desiredDateFormat).format(inputDate);
-
-  return formattedDate;
-}  
+    return formattedDate;
+  }
 
   String desiredDateFormat = "dd-MM-yyyy";
 
-
   void _filterData(String query) {
     setState(() {
-      mobileshow=true;
-      allshow=false;
-      dateshow=false;
-      if(isNumber(query)){
+      mobileshow = true;
+      allshow = false;
+      dateshow = false;
+      if (isNumber(query)) {
         setState(() {
-          usenumber=true;
+          usenumber = true;
         });
 
-         _filteredData = _lastTestDetails!
-          .where((item) => item.mobileNumber.toString().contains(query.toString()))
-          .toList();
-
-      }else{
-         setState(() {
-          usenumber=false;
+        _filteredData = _lastTestDetails!
+            .where((item) =>
+                item.mobileNumber.toString().contains(query.toString()))
+            .toList();
+      } else {
+        setState(() {
+          usenumber = false;
         });
-         _filteredData = _lastTestDetails!
-          .where((item) => item.patientName!.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-
+        _filteredData = _lastTestDetails!
+            .where((item) =>
+                item.patientName!.toLowerCase().contains(query.toLowerCase()))
+            .toList();
       }
-      
-     
-
-          
     });
   }
 
-
   @override
   void initState() {
-print(currentdate);
+    print(currentdate);
     print(selectedDate);
     // TODO: implement initState
     LocalDB.getLDB('userID').then((onevalue) {
-    
-setState(() {
-  userno=int.parse(onevalue);
-});
+      setState(() {
+        userno = int.parse(onevalue);
+      });
 
       print("Appointviewuserid $userno");
-    
-          fetchData();
 
-  
+      fetchData();
     });
     super.initState();
   }
 
+  bool isNumber(String input) {
+    final numberRegex = RegExp(r'^-?(\d+|\d*\.\d+)$');
+    return numberRegex.hasMatch(input);
+  }
 
-bool isNumber(String input) {
-  final numberRegex = RegExp(r'^-?(\d+|\d*\.\d+)$');
-  return numberRegex.hasMatch(input);
-}
-
-
-
-  
   @override
   Widget build(BuildContext context) {
-  //   final patient = data!.lstPatientResponse?.isNotEmpty == true
-  // ? data!.lstPatientResponse![0]
-  // : null;
-  //       print(patient!.gender);
-  // final patienttest= patient.lstTestDetails?.isNotEmpty==true?
-  // patient.lstTestDetails![0]:null;
-        
+    //   final patient = data!.lstPatientResponse?.isNotEmpty == true
+    // ? data!.lstPatientResponse![0]
+    // : null;
+    //       print(patient!.gender);
+    // final patienttest= patient.lstTestDetails?.isNotEmpty==true?
+    // patient.lstTestDetails![0]:null;
+
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-
-
     return SafeArea(
         child: GestureDetector(
-          onTap: ()=>FocusScope.of(context).unfocus(),
-          child: Scaffold(
-            backgroundColor: const Color(0xffEFEFEF),
-            body:WillPopScope(
-                onWillPop: ()async {
-            print("working-----------------------");
-                 FocusScope.of(context).unfocus();
-      NavigateController.pagePushLikePop(context,  const HomeView());     return false;
-          },
-              child: Column(
-                children: [
-                  SizedBox(
-                      height: height * 0.16,
-                      child: Column(
-                        children: [
-                          Container(
-                            height: height * 0.07,
-                            width: width,
-                            decoration: BoxDecoration(
-                                color: CustomTheme.background_green,
-                                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(height * 0.6/25))
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Scaffold(
+                backgroundColor: const Color(0xffEFEFEF),
+                body: WillPopScope(
+                  onWillPop: () async {
+                    print("working-----------------------");
+                    FocusScope.of(context).unfocus();
+                    NavigateController.pagePushLikePop(
+                        context, const HomeView());
+                    return false;
+                  },
+                  child: Column(children: [
+                    SizedBox(
+                        height: height * 0.16,
+                        child: Column(
+                          children: [
+                            Container(
+                              height: height * 0.07,
+                              width: width,
+                              decoration: BoxDecoration(
+                                  color: CustomTheme.background_green,
+                                  borderRadius: BorderRadius.only(
+                                      bottomLeft:
+                                          Radius.circular(height * 0.6 / 25))),
+                              child: Stack(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(11),
+                                      child: InkWell(
+                                          onTap: () {
+                                            FocusScope.of(context).unfocus();
+                                            NavigateController.pagePushLikePop(
+                                                context, const HomeView());
+                                          },
+                                          child: const Icon(
+                                            Icons.arrow_back_ios,
+                                            color: Colors.white,
+                                          )),
+                                    ),
+                                  ),
+                                  const Align(
+                                    alignment: Alignment.center,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(11),
+                                      child: Text(
+                                        "Appointment",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Stack(
+                            SizedBox(
+                              height: height * 0.02,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(11),
-                                    child: InkWell(
-                                        onTap: (){
-                                          FocusScope.of(context).unfocus();
-                                          NavigateController.pagePushLikePop(context,  const HomeView());
-                                        },
-                                        child: const Icon(Icons.arrow_back_ios,color: Colors.white,)),
+                                SizedBox(
+                                  width: width * 0.8,
+                                  height: height * 0.066,
+                                  child: TextFormField(
+                                    cursorColor: Colors.grey,
+                                    onChanged: _filterData,
+                                    decoration: InputDecoration(
+                                        contentPadding: const EdgeInsets.only(
+                                            top: 4, left: 13),
+                                        enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            borderSide: BorderSide(
+                                                color: CustomTheme
+                                                    .background_green,
+                                                width: 2)),
+                                        focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(14),
+                                            borderSide: BorderSide(
+                                                color: CustomTheme
+                                                    .background_green,
+                                                width: 2)),
+                                        hintText: 'Search'),
                                   ),
                                 ),
-                                const Align(
-                                  alignment: Alignment.center,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(11),
-                                    child: Text("Appointment",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),),
-                                  ),
+                                SizedBox(
+                                  width: width * 0.015,
                                 ),
+                                GestureDetector(
+                                    onTap: () async {
+                                      final DateTime? pickedDate =
+                                          await showDatePicker(
+                                              context: context,
+                                              initialDate: selectedDate ??
+                                                  DateTime.now(),
+                                              firstDate: DateTime(2023, 1, 1),
+                                              lastDate: DateTime.now(),
+                                              builder: (context, child) {
+                                                return Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      vertical: 80,
+                                                      horizontal: 30),
+                                                  child: Theme(
+                                                    data: ThemeData.light()
+                                                        .copyWith(
+                                                      primaryColor: CustomTheme
+                                                          .circle_green,
+                                                      buttonTheme:
+                                                          const ButtonThemeData(
+                                                              textTheme:
+                                                                  ButtonTextTheme
+                                                                      .primary),
+                                                      colorScheme: ColorScheme.light(
+                                                              primary: CustomTheme
+                                                                  .circle_green)
+                                                          .copyWith(
+                                                              secondary: CustomTheme
+                                                                  .circle_green),
+                                                      dialogTheme: const DialogTheme(
+                                                          shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .all(Radius
+                                                                      .circular(
+                                                                          16)))),
+                                                    ),
+                                                    child: child!,
+                                                  ),
+                                                );
+                                              });
+
+                                      if (pickedDate != null &&
+                                          pickedDate != selectedDate) {
+                                        fetchData();
+
+                                        setState(() {
+                                          dateshow = true;
+                                          mobileshow = false;
+                                          allshow = false;
+                                          selectedDate = pickedDate;
+                                          print(selectedDate);
+                                          filterdate = dateformat
+                                              .format(selectedDate)
+                                              .toString();
+                                          fetchData();
+                                          print(filterdate);
+                                          //  _lastTestDetails(filterdate);
+                                        });
+                                      }
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/calender.png',
+                                      height: height * 0.05,
+                                      color: CustomTheme.background_green,
+                                    ))
                               ],
                             ),
-                          ),
-                          SizedBox(height: height * 0.02,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: width * 0.8,
-                                height: height * 0.066,
-                                child: TextFormField(
-                                  cursorColor: Colors.grey,
-                                  onChanged:_filterData,
-                                
-                                  decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.only(top: 4,left: 13),
-                                      enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(14),
-                                          borderSide:  BorderSide(color: CustomTheme.background_green,width: 2)
-                                      ),
-                                      focusedBorder:OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(14),
-                                          borderSide:  BorderSide(color: CustomTheme.background_green,width: 2)
-                                      ),
-                                      hintText: 'Search'
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: width * 0.015,),
-                              GestureDetector(
-                                  onTap:
-                                   () async {
-              final DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: selectedDate ?? DateTime.now(),
-                firstDate: DateTime(2023, 1, 1),
-                lastDate: DateTime.now(),
-                 builder: (context, child) {
-                    return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 30),
-              child: Theme(
-              data: ThemeData.light().copyWith(
-                primaryColor: CustomTheme.circle_green,
-            
-                buttonTheme:
-                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
-                colorScheme:  ColorScheme.light(primary: CustomTheme.circle_green)
-                    .copyWith(secondary: CustomTheme.circle_green),
-                dialogTheme: const DialogTheme(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16)))),
-              ),
-              child: child!,
-              ),
-                    );
-                  }
-              );
-            
-              if (pickedDate != null && pickedDate != selectedDate) {
-                    fetchData();
-            
-                setState(() {
-                  dateshow=true;
-                  mobileshow=false;
-                  allshow=false;
-                  selectedDate = pickedDate;
-                  print(selectedDate);
-                  filterdate = dateformat.format(selectedDate).toString();
-                    fetchData();
-               print(filterdate);
-              //  _lastTestDetails(filterdate);
-            
-                });
-              }
-              },
-                                  child: Image.asset('assets/images/calender.png',height: height*0.05,color: CustomTheme.background_green,))
-                            ],
-                          ),
-                        ],
-                      )),
-                          Expanded(
-                            child: nodata?
-                                        Container(
-                                         height: height-170,width: width,
-                                      
-                                        child: Center(child: Text("Somthing went wrong")),):
-                                              isFetching?
-                                              Container(
-                                                height: height-170,width: width,
-                                                child: Center(child: CircularProgressIndicator())):
-                                          
-                                SingleChildScrollView(
+                          ],
+                        )),
+                    Expanded(
+                      child: nodata
+                          ? SizedBox(
+                              height: height - 170,
+                              width: width,
+                              child: const Center(
+                                  child: Text("Somthing went wrong")),
+                            )
+                          : isFetching
+                              ? SizedBox(
+                                  height: height - 170,
+                                  width: width,
+                                  child: const Center(
+                                      child: CircularProgressIndicator()))
+                              : SingleChildScrollView(
                                   child: Column(
                                     children: [
                                       Flex(
                                         direction: Axis.vertical,
                                         children: [
                                           //////////////////////////////////////////////////////////////
-                                          
-                                      
-                                          mobileshow?
-                                          ListView.builder(
-                                            itemCount: _filteredData!.length,
-                                            shrinkWrap: true,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemBuilder: (BuildContext context, int index) {
-                                              var item = _filteredData![index];
-                                              
-                                              return 
-                                               InkWell(
-                                                onTap: (){
-                                                  NavigateController.pagePush(context,  PatientDetailsView(screenType: 1, bookingType: BookinType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
-                                                                                             print(item.bookingId.toString());
-                                      
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
-                                                  child: Container(
-                                                    height: height * 0.13,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius: BorderRadius.circular(17)
-                                                    ),
-                                                    child: Stack(
-                                                      children: [
-                                                        Positioned(
-                                                            right:width * 0.0,
-                                                            bottom: height * 0.0,
-                                                            child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
-                                                        ),
-                                                        Positioned(
-                                                          bottom: height * 0.012,
-                                                          right:width * 0.02 ,
-                                                          child: Text(
-                                                            item.isPaid == true ? "PAID" : "UNPAID",
-                                                            style: const TextStyle(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.w500,
-                                                                fontSize: 11),
-                                                          ),),
-                                                        Positioned(
-                                                          left:width * 0.03,
-                                                          top: height * 0.035,
-                                                          child: const Column(
-                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                            children:  [
-                                                              CircleAvatar(
-                                                                backgroundColor:  Color(0xffEFEFEF),
-                                                                radius: 27,
-                                                                backgroundImage: AssetImage('assets/images/profile.png'),
+
+                                          mobileshow
+                                              ? ListView.builder(
+                                                  itemCount:
+                                                      _filteredData!.length,
+                                                  shrinkWrap: true,
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int index) {
+                                                    var item =
+                                                        _filteredData![index];
+
+                                                    return InkWell(
+                                                      onTap: () {
+                                                        NavigateController
+                                                            .pagePush(
+                                                                context,
+                                                                PatientDetailsView(
+                                                                  screenType: 1,
+                                                                  bookingType:
+                                                                      BookinType,
+                                                                  bookingID: item
+                                                                      .bookingId
+                                                                      .toString(),
+                                                                  regdate: item
+                                                                      .registeredDateTime
+                                                                      .toString(),
+                                                                ));
+                                                        print(item.bookingId
+                                                            .toString());
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 5),
+                                                        child: Container(
+                                                          height: height * 0.13,
+                                                          decoration: BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          17)),
+                                                          child: Stack(
+                                                            children: [
+                                                              Positioned(
+                                                                  right: width *
+                                                                      0.0,
+                                                                  bottom:
+                                                                      height *
+                                                                          0.0,
+                                                                  child: Image
+                                                                      .asset(
+                                                                    'assets/images/side_illustrate.png',
+                                                                    height:
+                                                                        height *
+                                                                            0.05,
+                                                                    color: const Color(
+                                                                        0xff182893),
+                                                                  )),
+                                                              Positioned(
+                                                                bottom: height *
+                                                                    0.012,
+                                                                right: width *
+                                                                    0.02,
+                                                                child: Text(
+                                                                  item.isPaid ==
+                                                                          true
+                                                                      ? "PAID"
+                                                                      : "UNPAID",
+                                                                  style: const TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                      fontSize:
+                                                                          11),
+                                                                ),
+                                                              ),
+                                                              Positioned(
+                                                                left: width *
+                                                                    0.03,
+                                                                top: height *
+                                                                    0.035,
+                                                                child:
+                                                                    const Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    CircleAvatar(
+                                                                      backgroundColor:
+                                                                          Color(
+                                                                              0xffEFEFEF),
+                                                                      radius:
+                                                                          27,
+                                                                      backgroundImage:
+                                                                          AssetImage(
+                                                                              'assets/images/profile.png'),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Positioned(
+                                                                left: width *
+                                                                    0.21,
+                                                                top: height *
+                                                                    0.02,
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                            "${item.patientName}",
+                                                                            style:
+                                                                                const TextStyle(color: Color(0xff203298)),
+                                                                            overflow: TextOverflow.ellipsis),
+                                                                        Text(
+                                                                          " ${item.age}, ${item.gender}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.grey,
+                                                                              fontWeight: FontWeight.w600,
+                                                                              fontSize: 13),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          height *
+                                                                              0.01,
+                                                                    ),
+                                                                    SizedBox(
+                                                                        width: width *
+                                                                            0.6,
+                                                                        child:
+                                                                            Text(
+                                                                          "${item.address}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.grey,
+                                                                              fontWeight: FontWeight.w600),
+                                                                          maxLines:
+                                                                              1,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                        )),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          height *
+                                                                              0.01,
+                                                                    ),
+                                                                    Text(
+                                                                      "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
+                                                                      // "${CustomTheme.normalDate.format(DateFormat("dd-MM-yyyy").parse(item["registeredDateTime"]))}"
+                                                                      // "${VM.lstPatientResponse![index].registeredDateTime}"
+                                                                      "",
+                                                                      style: const TextStyle(
+                                                                          color: Colors
+                                                                              .grey,
+                                                                          fontWeight:
+                                                                              FontWeight.w600),
+                                                                    ),
+                                                                  ],
+                                                                ),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
-                                                        Positioned(
-                                                          left:width * 0.21,
-                                                          top: height * 0.02,
-                                                          child: Column(
-                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children:  [
-                                                              Row(
-                                                                children:  [
-                                                                  Text( "${item.patientName}",style: const TextStyle(color: Color(0xff203298)),overflow: TextOverflow.ellipsis),
-                                                                  Text(" ${item.age}, ${item.gender }",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
+                                                      ),
+                                                    );
+                                                  },
+                                                )
+                                              : dateshow
+                                                  ? ListView.builder(
+                                                      itemCount: _lastTestDetails!
+                                                          .where((item) =>
+                                                              formatDateString(
+                                                                  item.registeredDateTime
+                                                                      .toString(),
+                                                                  desiredDateFormat) ==
+                                                              filterdate)
+                                                          .length,
+                                                      shrinkWrap: true,
+                                                      physics:
+                                                          const NeverScrollableScrollPhysics(),
+                                                      itemBuilder:
+                                                          (BuildContext context,
+                                                              int index) {
+                                                        var item = _lastTestDetails!
+                                                            .where((item) =>
+                                                                formatDateString(
+                                                                    item.registeredDateTime
+                                                                        .toString(),
+                                                                    desiredDateFormat) ==
+                                                                filterdate)
+                                                            .toList()[index];
+                                                        return InkWell(
+                                                          onTap: () {
+                                                            NavigateController
+                                                                .pagePush(
+                                                                    context,
+                                                                    PatientDetailsView(
+                                                                      screenType:
+                                                                          1,
+                                                                      bookingType:
+                                                                          BookinType,
+                                                                      bookingID: item
+                                                                          .bookingId
+                                                                          .toString(),
+                                                                      regdate: item
+                                                                          .registeredDateTime
+                                                                          .toString(),
+                                                                    ));
+                                                            print(item.bookingId
+                                                                .toString());
+                                                          },
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        8,
+                                                                    vertical:
+                                                                        5),
+                                                            child: Container(
+                                                              height:
+                                                                  height * 0.13,
+                                                              decoration: BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              17)),
+                                                              child: Stack(
+                                                                children: [
+                                                                  Positioned(
+                                                                      right:
+                                                                          width *
+                                                                              0.0,
+                                                                      bottom:
+                                                                          height *
+                                                                              0.0,
+                                                                      child: Image
+                                                                          .asset(
+                                                                        'assets/images/side_illustrate.png',
+                                                                        height: height *
+                                                                            0.05,
+                                                                        color: const Color(
+                                                                            0xff182893),
+                                                                      )),
+                                                                  Positioned(
+                                                                    bottom:
+                                                                        height *
+                                                                            0.012,
+                                                                    right:
+                                                                        width *
+                                                                            0.02,
+                                                                    child: Text(
+                                                                      item.isPaid ==
+                                                                              true
+                                                                          ? "PAID"
+                                                                          : "UNPAID",
+                                                                      style: const TextStyle(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          fontWeight: FontWeight
+                                                                              .w500,
+                                                                          fontSize:
+                                                                              11),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    left: width *
+                                                                        0.03,
+                                                                    top: height *
+                                                                        0.035,
+                                                                    child:
+                                                                        const Column(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        CircleAvatar(
+                                                                          backgroundColor:
+                                                                              Color(0xffEFEFEF),
+                                                                          radius:
+                                                                              27,
+                                                                          backgroundImage:
+                                                                              AssetImage('assets/images/profile.png'),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    left: width *
+                                                                        0.21,
+                                                                    top: height *
+                                                                        0.02,
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        Row(
+                                                                          children: [
+                                                                            Text("${item.patientName}",
+                                                                                style: const TextStyle(color: Color(0xff203298)),
+                                                                                overflow: TextOverflow.ellipsis),
+                                                                            Text(
+                                                                              " ${item.age}, ${item.gender}",
+                                                                              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600, fontSize: 13),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              height * 0.01,
+                                                                        ),
+                                                                        SizedBox(
+                                                                            width: width *
+                                                                                0.6,
+                                                                            child:
+                                                                                Text(
+                                                                              "${item.address}",
+                                                                              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+                                                                              maxLines: 1,
+                                                                              overflow: TextOverflow.ellipsis,
+                                                                            )),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              height * 0.01,
+                                                                        ),
+                                                                        Text(
+                                                                          "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
+                                                                          // "${VM.lstPatientResponse![index].registeredDateTime}"
+                                                                          "",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.grey,
+                                                                              fontWeight: FontWeight.w600),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
                                                                 ],
                                                               ),
-                                                              SizedBox(
-                                                                height: height * 0.01,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    )
+                                                  : const SizedBox(),
+                                          // const Text("No data in the selected date"),
+
+                                          allshow
+                                              ? ListView.builder(
+                                                  itemCount:
+                                                      _lastTestDetails!.length,
+                                                  shrinkWrap: true,
+                                                  physics:
+                                                      const NeverScrollableScrollPhysics(),
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int index) {
+                                                    var item =
+                                                        _lastTestDetails![
+                                                            index];
+                                                    return InkWell(
+                                                      onTap: () {
+                                                        NavigateController
+                                                            .pagePush(
+                                                                context,
+                                                                PatientDetailsView(
+                                                                  screenType: 1,
+                                                                  bookingType:
+                                                                      BookinType,
+                                                                  bookingID: item
+                                                                      .bookingId
+                                                                      .toString(),
+                                                                  regdate: item
+                                                                      .registeredDateTime
+                                                                      .toString(),
+                                                                ));
+                                                        print(item.bookingId
+                                                            .toString());
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 5),
+                                                        child: Container(
+                                                          height: height * 0.13,
+                                                          decoration: BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          17)),
+                                                          child: Stack(
+                                                            children: [
+                                                              Positioned(
+                                                                  right: width *
+                                                                      0.0,
+                                                                  bottom:
+                                                                      height *
+                                                                          0.0,
+                                                                  child: Image
+                                                                      .asset(
+                                                                    'assets/images/side_illustrate.png',
+                                                                    height:
+                                                                        height *
+                                                                            0.05,
+                                                                    color: const Color(
+                                                                        0xff182893),
+                                                                  )),
+                                                              Positioned(
+                                                                bottom: height *
+                                                                    0.012,
+                                                                right: width *
+                                                                    0.02,
+                                                                child: Text(
+                                                                  item.isPaid ==
+                                                                          true
+                                                                      ? "PAID"
+                                                                      : "UNPAID",
+                                                                  style: const TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                      fontSize:
+                                                                          11),
+                                                                ),
                                                               ),
-                                                              SizedBox(
-                                                                  width: width * 0.6,
-                                                                  child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                                                              SizedBox(
-                                                                height: height * 0.01,
+                                                              Positioned(
+                                                                left: width *
+                                                                    0.03,
+                                                                top: height *
+                                                                    0.035,
+                                                                child:
+                                                                    const Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    CircleAvatar(
+                                                                      backgroundColor:
+                                                                          Color(
+                                                                              0xffEFEFEF),
+                                                                      radius:
+                                                                          27,
+                                                                      backgroundImage:
+                                                                          AssetImage(
+                                                                              'assets/images/profile.png'),
+                                                                    ),
+                                                                  ],
+                                                                ),
                                                               ),
-                                                              Text(
-                                                          "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
-                                                                // "${CustomTheme.normalDate.format(DateFormat("dd-MM-yyyy").parse(item["registeredDateTime"]))}"
-                                                                    // "${VM.lstPatientResponse![index].registeredDateTime}"
-                                                                    ""
-                                                                ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
+                                                              Positioned(
+                                                                left: width *
+                                                                    0.21,
+                                                                top: height *
+                                                                    0.02,
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                            "${item.patientName}",
+                                                                            style:
+                                                                                const TextStyle(color: Color(0xff203298)),
+                                                                            overflow: TextOverflow.ellipsis),
+                                                                        Text(
+                                                                          " ${item.age}, ${item.gender}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.grey,
+                                                                              fontWeight: FontWeight.w600,
+                                                                              fontSize: 13),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          height *
+                                                                              0.01,
+                                                                    ),
+                                                                    SizedBox(
+                                                                        width: width *
+                                                                            0.6,
+                                                                        child:
+                                                                            Text(
+                                                                          "${item.address}",
+                                                                          style: const TextStyle(
+                                                                              color: Colors.grey,
+                                                                              fontWeight: FontWeight.w600),
+                                                                          maxLines:
+                                                                              1,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                        )),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          height *
+                                                                              0.01,
+                                                                    ),
+                                                                    Text(
+                                                                      "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
+                                                                      // "${VM.lstPatientResponse![index].registeredDateTime}"
+                                                                      "",
+                                                                      style: const TextStyle(
+                                                                          color: Colors
+                                                                              .grey,
+                                                                          fontWeight:
+                                                                              FontWeight.w600),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
                                                             ],
                                                           ),
                                                         ),
-                                      
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ):
-                                            dateshow?
-                                      
-                                            ListView.builder(
-                                            itemCount: _lastTestDetails!.where((item) =>
-                                        formatDateString(item.registeredDateTime.toString(), desiredDateFormat)  == filterdate)
-                                        .length,
-                                            shrinkWrap: true,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemBuilder: (BuildContext context, int index) {
-                                              var item = _lastTestDetails!.where((item) =>
-                                        formatDateString(item.registeredDateTime.toString(), desiredDateFormat)  == filterdate)
-                                        .toList()[index];
-                                              return InkWell(
-                                                onTap: (){
-                                                  NavigateController.pagePush(context,  PatientDetailsView(screenType: 1, bookingType: BookinType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(),  ));
-                                                                                              print(item.bookingId.toString());
-                                      
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
-                                                  child: Container(
-                                                    height: height * 0.13,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius: BorderRadius.circular(17)
-                                                    ),
-                                                    child: Stack(
-                                                      children: [
-                                                        Positioned(
-                                                            right:width * 0.0,
-                                                            bottom: height * 0.0,
-                                                            child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
-                                                        ),
-                                                        Positioned(
-                                                          bottom: height * 0.012,
-                                                          right:width * 0.02 ,
-                                                          child: Text(
-                                                            item.isPaid == true ? "PAID" : "UNPAID",
-                                                            style: const TextStyle(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.w500,
-                                                                fontSize: 11),
-                                                          ),),
-                                                        Positioned(
-                                                          left:width * 0.03,
-                                                          top: height * 0.035,
-                                                          child: const Column(
-                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                            children:  [
-                                                              CircleAvatar(
-                                                                backgroundColor:  Color(0xffEFEFEF),
-                                                                radius: 27,
-                                                                backgroundImage: AssetImage('assets/images/profile.png'),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          left:width * 0.21,
-                                                          top: height * 0.02,
-                                                          child: Column(
-                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children:  [
-                                                              Row(
-                                                                children:  [
-                                                                  Text("${item.patientName}",style: const TextStyle(color: Color(0xff203298)),overflow: TextOverflow.ellipsis),
-                                                                  Text(" ${item.age}, ${item.gender }",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
-                                                                ],
-                                                              ),
-                                                              SizedBox(
-                                                                height: height * 0.01,
-                                                              ),
-                                                              SizedBox(
-                                                                  width: width * 0.6,
-                                                                  child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                                                              SizedBox(
-                                                                height: height * 0.01,
-                                                              ),
-                                                              Text(
-                                                          "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
-                                                                    // "${VM.lstPatientResponse![index].registeredDateTime}"
-                                                                    ""
-                                                                ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                            ],
-                                                          ),
-                                                        ),
-                                      
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ):
-                                          const Text("No data in the selected date"),
-                                     
-                                     allshow?
-                                          ListView.builder(
-                                            itemCount: _lastTestDetails!.length,
-                                            shrinkWrap: true,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemBuilder: (BuildContext context, int index) {
-                                              var item = _lastTestDetails![index];
-                                              return InkWell(
-                                                onTap: (){
-                                                  NavigateController.pagePush(context,  PatientDetailsView(screenType: 1, bookingType: BookinType, bookingID:  item.bookingId.toString(), regdate: item.registeredDateTime.toString(), ));
-                                                print(item.bookingId.toString());
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 5),
-                                                  child: Container(
-                                                    height: height * 0.13,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius: BorderRadius.circular(17)
-                                                    ),
-                                                    child: Stack(
-                                                      children: [
-                                                        Positioned(
-                                                            right:width * 0.0,
-                                                            bottom: height * 0.0,
-                                                            child: Image.asset('assets/images/side_illustrate.png',height: height*0.05,color:  const Color(0xff182893),)
-                                                        ),
-                                                        Positioned(
-                                                          bottom: height * 0.012,
-                                                          right:width * 0.02 ,
-                                                          child: Text(
-                                                            item.isPaid == true ? "PAID" : "UNPAID",
-                                                            style: const TextStyle(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.w500,
-                                                                fontSize: 11),
-                                                          ),),
-                                                        Positioned(
-                                                          left:width * 0.03,
-                                                          top: height * 0.035,
-                                                          child: const Column(
-                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                            children:  [
-                                                              CircleAvatar(
-                                                                backgroundColor:  Color(0xffEFEFEF),
-                                                                radius: 27,
-                                                                backgroundImage: AssetImage('assets/images/profile.png'),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          left:width * 0.21,
-                                                          top: height * 0.02,
-                                                          child: Column(
-                                                            mainAxisAlignment: MainAxisAlignment.center,
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            children:  [
-                                                              Row(
-                                                                children:  [
-                                                                  Text(  "${item.patientName}",style: const TextStyle(color: Color(0xff203298)),overflow: TextOverflow.ellipsis),
-                                                                  Text(" ${item.age}, ${item.gender }",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600,fontSize: 13),),
-                                                                ],
-                                                              ),
-                                                              SizedBox(
-                                                                height: height * 0.01,
-                                                              ),
-                                                              SizedBox(
-                                                                  width: width * 0.6,
-                                                                  child: Text("${item.address}",style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),maxLines: 1,overflow: TextOverflow.ellipsis,)),
-                                                              SizedBox(
-                                                                height: height * 0.01,
-                                                              ),
-                                                              Text(
-                                                          "${CustomTheme.normalDate.format(DateFormat("yyyy-MM-dd HH:mm").parse(item.registeredDateTime.toString()))}"
-                                                                    // "${VM.lstPatientResponse![index].registeredDateTime}"
-                                                                    ""
-                                                                ,style: const TextStyle(color: Colors.grey,fontWeight: FontWeight.w600),),
-                                                            ],
-                                                          ),
-                                                        ),
-                                      
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          )
-                                          :
-                                      
-                                      
-                                     iserror?const Center(child: Text("No Records found!!!")):
-                                      
-                                     const Text("Record in the Selected Date"),
-                                      
-                                    
-                                   
-                                          
+                                                      ),
+                                                    );
+                                                  },
+                                                )
+                                              : iserror
+                                                  ? const Center(
+                                                      child: Text(
+                                                          "No Records found!!!"))
+                                                  : const Text("Shortlisted Record"),
                                         ],
                                       ),
-                                      SizedBox(height: height * 0.04,),
+                                      SizedBox(
+                                        height: height * 0.04,
+                                      ),
                                     ],
                                   ),
                                 ),
-                          )
-            
-             ]),
-            ))));
+                    )
+                  ]),
+                ))));
   }
 }

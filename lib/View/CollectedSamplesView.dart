@@ -528,8 +528,10 @@ bool isNumber(String input) {
                                             );
                                           },
                           
-                                        ):
-                                          const Text("No data in the selected date"),
+                                        )
+                                            : const SizedBox(),
+
+                                          // const Text("No data in the selected date"),
                                      
                                      allshow?
                                          
@@ -632,9 +634,10 @@ bool isNumber(String input) {
                                           :
                           
                           
-                                     iserror?const Center(child: Text("No Records found!!!")):
-                          
-                                     const Text("Here Record in the Selected Date"),
+                                     iserror?const Center(child: Text("No Records found!!!"))
+                                          
+                                          : const Text("Shortlisted Record"),
+
                           
                                     
                                    

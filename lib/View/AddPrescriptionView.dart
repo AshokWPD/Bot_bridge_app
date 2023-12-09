@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Model/ApiClient.dart';
@@ -74,7 +75,26 @@ Future<void> _updateStoredImagePaths() async {
 }
 
 
+ void showGuide( BuildContext context,content){
+QuickAlert.show(
+ context: context,
+ type:QuickAlertType.success,
+//  customAsset: "assets/images/ok_popup.gif",
 
+ text: content,
+ confirmBtnText: 'Done',
+//  cancelBtnText: 'No',
+ onConfirmBtnTap: (){
+ NavigateController.pagePushLikePop(context, PatientDetailsView(screenType: widget.screenType, bookingType: widget.booktype, bookingID: widget.bookingID, regdate: widget.regdate,));        // Change this to your desired behavior
+
+
+ },
+//  onCancelBtnTap: (){
+//   NavigateController.pagePOP(context);
+//  },
+ confirmBtnColor: Colors.green,
+);
+  }
 
   Future<void> captureImage() async {
     final XFile? capturedImage = await pickImage.pickImage(source: ImageSource.camera);
@@ -151,6 +171,7 @@ void processImages(List<XFile> images) async {
 
 Future<void> uploadImagesToServer(Map<String, dynamic> params) async {
     ApiClient().fetchData(ServerURL().getUrl(RequestType.UploadPrescription), params).then((value) {
+      showGuide(context, "prescription Uploaded Successfully");
       Fluttertoast.showToast(
         msg: "Uploaded Successfully",
         toastLength: Toast.LENGTH_SHORT,
@@ -494,5 +515,9 @@ if (!uploaded)
         ),
       ),
     );
+
+  
+
+
   }
 }

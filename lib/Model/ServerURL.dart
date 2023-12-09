@@ -6,13 +6,13 @@ class ServerURL {
     static String token = "http://255.255.255.0/CaretrakME/MApp/";
 
 
-   static String baseurl = "http://uat.yungtrepreneur.com/HCAPI/api/ExternalAPI/";
-  //  static String baseurl = "http://lims.yungtrepreneur.com/HCAPI/api/ExternalAPI/";
+  //  static String baseurl = "http://uat.yungtrepreneur.com/HCAPI/api/ExternalAPI/";
+   static String baseurl = "http://lims.yungtrepreneur.com/HCAPI/api/ExternalAPI/";
 
 
-  //  static String serviceDataURL = "http://uat.yungtrepreneur.com/HCAPI/api/ExternalAPI/GetServiceDetails?VenueNo=2&VenueBranchNo=2";
+   static String serviceDataURL = "http://lims.yungtrepreneur.com/HCAPI/api/ExternalAPI/GetServiceDetails?VenueNo=2&VenueBranchNo=2";
 
-  static String serviceDataURL = "http://uat.yungtrepreneur.com/HCAPI/api/ExternalAPI/GetServiceDetails?VenueNo=2&VenueBranchNo=2";
+  // static String serviceDataURL = "http://uat.yungtrepreneur.com/HCAPI/api/ExternalAPI/GetServiceDetails?VenueNo=2&VenueBranchNo=2";
   getUrl(RequestType RequestTypes) {
     switch (RequestTypes) {
       case RequestType.Login:
