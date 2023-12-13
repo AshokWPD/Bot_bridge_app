@@ -46,17 +46,24 @@ class _SearchTestsState extends State<SearchTests> with TickerProviderStateMixin
     super.dispose();
   }
 
-  handleTabSelection() {
-    setState(() {
-      selectedItem = tabController.index;
-      searchtxt = searchtestController.text;
-    });
-    ServiceDetailsVM model =
-    Provider.of<ServiceDetailsVM>(context, listen: true);
+handleTabSelection() {
+  setState(() {
+    selectedItem = tabController.index;
+    searchtxt = searchtestController.text;
+  });
 
-    model.setsearch_name(searchtestController.text);
-    model.setsearch_key("$tabController.index");
-  }
+  Builder(
+    builder: (BuildContext context) {
+      ServiceDetailsVM model = Provider.of<ServiceDetailsVM>(context, listen: true);
+
+      model.setsearch_name(searchtestController.text);
+      model.setsearch_key("$tabController.index");
+
+      return SizedBox.shrink(); // This widget doesn't need to render anything
+    },
+  );
+}
+
 
 
   @override
@@ -136,7 +143,7 @@ class _SearchTestsState extends State<SearchTests> with TickerProviderStateMixin
                 const SizedBox(height: 20),
                  TabBar(
                    controller: tabController,
-                  
+                        indicator: null, // Set the indicator to null to remove the line
                    splashBorderRadius: BorderRadius.circular(10),
                      overlayColor: MaterialStateProperty.resolveWith<Color?>(
                            (Set<MaterialState> states) {
@@ -153,8 +160,8 @@ class _SearchTestsState extends State<SearchTests> with TickerProviderStateMixin
                        });
                      },
                      indicatorColor:Colors.transparent,
-                     indicatorWeight: 1,
-                     labelColor: CustomTheme.background_green,
+                     indicatorWeight: 6,
+                      labelColor: CustomTheme.background_green,
                      labelStyle: const TextStyle(fontWeight: FontWeight.bold),
                      unselectedLabelColor:Colors.white ,
                      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
@@ -164,7 +171,7 @@ class _SearchTestsState extends State<SearchTests> with TickerProviderStateMixin
                    tabContainer("TEST",2 == selectedItem),
                    tabContainer("GRP",3 == selectedItem),
                 ]),
-                const SizedBox(height: 20,),
+                //  const SizedBox(height: 10,),
                  Expanded(
                   child:  TabBarView(
                     controller: tabController,

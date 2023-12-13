@@ -1,15 +1,11 @@
 import 'dart:convert';
-
 import 'package:botbridge_green/Model/Response/AppoitmentAndRequestData.dart';
 import 'package:botbridge_green/Model/ServerURL.dart';
 import 'package:botbridge_green/Utils/LocalDB.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-import '../Model/Status.dart';
 import '../Utils/NavigateController.dart';
-import '../ViewModel/HistoryVM.dart';
 import 'Helper/ThemeCard.dart';
 import 'HomeView.dart';
 import 'PatientDetailsView.dart';
@@ -149,7 +145,6 @@ class _HistoryViewState extends State<HistoryView> {
       //     "userNo": "2",
       //     "mobileNumber":"",
       //       "registerdDateTime": "$selectedDate"
-
       //   };
       //   _api.fetchAppointmentDetails(params);
     });
@@ -302,7 +297,6 @@ class _HistoryViewState extends State<HistoryView> {
                                                   ),
                                                 );
                                               });
-
                                       if (pickedDate != null &&
                                           pickedDate != selectedDate) {
                                         fetchData();
@@ -920,8 +914,18 @@ class _HistoryViewState extends State<HistoryView> {
                                                       ? const Center(
                                                           child: Text(
                                                               "No Records found!!!"))
-                                                      : const Text(
-                                                          "Shortlisted Record"),
+                                                      : _lastTestDetails!
+                                                              .where((item) =>
+                                                                  formatDateString(
+                                                                      item.registeredDateTime
+                                                                          .toString(),
+                                                                      desiredDateFormat) ==
+                                                                  filterdate)
+                                                              .isEmpty
+                                                          ? const Text(
+                                                              "No Records in the Selected Date")
+                                                          : const Text(
+                                                              "Shortlisted Record"),
                                             ],
                                           ),
                                           SizedBox(

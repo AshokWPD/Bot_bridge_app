@@ -636,7 +636,14 @@ bool isNumber(String input) {
                           
                                      iserror?const Center(child: Text("No Records found!!!"))
                                           
-                                          : const Text("Shortlisted Record"),
+                                          :_lastTestDetails!
+                                                          .where((item) =>
+                                                              formatDateString(
+                                                                  item.registeredDateTime
+                                                                      .toString(),
+                                                                  desiredDateFormat) ==
+                                                              filterdate)
+                                                          .length==0? Text("No Records in the Selected Date"): const Text("Shortlisted Record"),
 
                           
                                     

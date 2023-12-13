@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../Model/ApiClient.dart';
 import '../Utils/LocalDB.dart';
+// import '../ViewModel/BookedServiceVM.dart';
 import '../ViewModel/BookedServiceVM.dart';
 import 'AddToCartView.dart';
 import 'Helper/ThemeCard.dart';
@@ -144,18 +145,18 @@ class _NewBookingViewState extends State<NewBookingView> {
   String? selectedTitle;
   String? selectedReferral;
   int selectRefno = 1;
-  _scrollListener() {
-    bool isTop = control.position.pixels == 0;
-    setState(() {
-      if (isTop) {
-        floatingButtonVisible = false;
-        print('At the top');
-      } else {
-        floatingButtonVisible = true;
-        print('At the bottom');
-      }
-    });
-  }
+  // _scrollListener() {
+  //   bool isTop = control.position.pixels == 0;
+  //   setState(() {
+  //     if (isTop) {
+  //       floatingButtonVisible = false;
+  //       print('At the top');
+  //     } else {
+  //       floatingButtonVisible = true;
+  //       print('At the bottom');
+  //     }
+  //   });
+  // }
 
   getData() async {
     LocalDB.getLDB("AccountName").then((value) {
@@ -182,33 +183,36 @@ class _NewBookingViewState extends State<NewBookingView> {
 
   @override
   void initState() {
+        super.initState();
+
     emailID.text = '';
     txtdate = dateformatnow.format(DateTime.now()).toString();
     getData();
-    // TODO: implement initState
-    setState(() {
-      control.addListener(() {
-        if (control.position.atEdge) {
-          bool isTop = control.position.pixels == 0;
-          setState(() {
-            if (isTop) {
-              floatingButtonVisible = false;
-              print('At the top');
-            } else {
-              floatingButtonVisible = true;
-              print('At the bottom');
-            }
-          });
-        }
-      });
-    });
-    BookedServiceVM model =
-        Provider.of<BookedServiceVM>(context, listen: false);
+      control.addListener(_scrollListener);
+
+   Future.delayed(Duration.zero, () {
+    BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
     model.fetchBookedService({}, model, true);
     startFetching();
-    usererror = false;
+  });
 
-    super.initState();
+  usererror = false;
+
+  }
+
+   void _scrollListener() {
+    bool isTop = control.position.pixels == 0;
+    if (isTop) {
+      setState(() {
+        floatingButtonVisible = false;
+        print('At the top');
+      });
+    } else {
+      setState(() {
+        floatingButtonVisible = true;
+        print('At the bottom');
+      });
+    }
   }
 
   UnderlineInputBorder outline = const UnderlineInputBorder(

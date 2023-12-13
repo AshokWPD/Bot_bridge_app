@@ -97,7 +97,7 @@ bool isshow=true;
             Align(
               alignment: Alignment.center,
               child:Container(
-                color: Colors.transparent,
+                // color: Colors.transparent,
                 child: SingleChildScrollView(
                   child: Form(
                     key: _formkey,
@@ -117,6 +117,7 @@ bool isshow=true;
                                 }
                                 return null;
                               },
+                              keyboardType: TextInputType.emailAddress,
                               style: TextStyle(color: Colors.white),
                               decoration:  InputDecoration(
                                   focusedBorder: const UnderlineInputBorder(
@@ -125,13 +126,13 @@ bool isshow=true;
                                   enabledBorder: const UnderlineInputBorder(
                                       borderSide: BorderSide(color:Colors.white60 )
                                   ),
-                                  errorBorder: const UnderlineInputBorder(
-                                      borderSide: BorderSide(color:Colors.orangeAccent )
-                                  ),
-                                  focusedErrorBorder:const UnderlineInputBorder(
-                                      borderSide: BorderSide(color:Colors.orangeAccent )
-                                  ) ,
-                                  errorStyle: const TextStyle(color: Colors.deepOrangeAccent,fontSize: 12),
+                                  // errorBorder: const UnderlineInputBorder(
+                                  //     borderSide: BorderSide(color:Colors.orangeAccent )
+                                  // ),
+                                  // focusedErrorBorder:const UnderlineInputBorder(
+                                  //     borderSide: BorderSide(color:Colors.orangeAccent )
+                                  // ) ,
+                                  // errorStyle: const TextStyle(color: Colors.deepOrangeAccent,fontSize: 12),
                                   suffixIcon:  Padding(
                                     padding: const EdgeInsets.all(12.0),
                                     child: Image.asset('assets/images/user_name.png',height: 23,color: Colors.white,),

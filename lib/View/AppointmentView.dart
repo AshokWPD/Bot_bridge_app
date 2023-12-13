@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:botbridge_green/Model/Response/AppoitmentAndRequestData.dart';
 import 'package:botbridge_green/Model/ServerURL.dart';
 import 'package:botbridge_green/Utils/LocalDB.dart';
@@ -13,6 +12,8 @@ import '../Utils/NavigateController.dart';
 import '../ViewModel/AppointmentListVM.dart';
 import 'Helper/ThemeCard.dart';
 import 'package:http/http.dart' as http;
+
+
 
 class AppointmentView extends StatefulWidget {
   const AppointmentView({super.key});
@@ -334,7 +335,8 @@ class _AppointmentViewState extends State<AppointmentView> {
                               ],
                             ),
                           ],
-                        )),
+                        )
+                        ),
                     Expanded(
                       child: nodata
                           ? SizedBox(
@@ -910,7 +912,14 @@ class _AppointmentViewState extends State<AppointmentView> {
                                                   ? const Center(
                                                       child: Text(
                                                           "No Records found!!!"))
-                                                  : const Text("Shortlisted Record"),
+                                                  : _lastTestDetails!
+                                                          .where((item) =>
+                                                              formatDateString(
+                                                                  item.registeredDateTime
+                                                                      .toString(),
+                                                                  desiredDateFormat) ==
+                                                              filterdate)
+                                                          .length==0? Text("No Records in the Selected Date"):Text("Shortlisted Record"),
                                         ],
                                       ),
                                       SizedBox(
