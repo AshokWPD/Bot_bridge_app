@@ -66,7 +66,7 @@ class _BarcodePageState extends State<BarcodePage> {
             "The patient status Updated!", const AppointmentView());
       } else {
         Navigator.pop(context);
-        errorPopUp(context);
+        errorPopUp(context,'Something went wrong.\nPlease try again.');
       }
     });
   }

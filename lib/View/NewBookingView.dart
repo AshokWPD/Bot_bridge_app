@@ -14,13 +14,18 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../Model/ApiClient.dart';
+import '../Model/Response/AppoitmentAndRequestData.dart';
+import '../Model/Status.dart';
 import '../Utils/LocalDB.dart';
 // import '../ViewModel/BookedServiceVM.dart';
 import '../ViewModel/BookedServiceVM.dart';
+import '../ViewModel/changeNotify.dart';
 import 'AddToCartView.dart';
 import 'Helper/ThemeCard.dart';
 import 'PaymentView.dart';
 import 'package:http/http.dart' as http;
+
+import 'TabbarView.dart';
 
 class NewBookingView extends StatefulWidget {
   const NewBookingView({Key? key}) : super(key: key);
@@ -47,9 +52,7 @@ class _NewBookingViewState extends State<NewBookingView> {
   final TextEditingController age = TextEditingController();
   DateFormat dateformat = DateFormat('dd/MM/yyyy');
   DateFormat dateformatnow = DateFormat('yyyy-MM-dd 00:00:00.000');
-
   FocusNode referalfocuse = FocusNode();
-
   DateTime selectedDate = DateTime.now();
   String accountuser = '';
   final scaffoldkey = GlobalKey<ScaffoldState>();
@@ -76,6 +79,9 @@ class _NewBookingViewState extends State<NewBookingView> {
     print("Start2");
     bool serviceEnabled;
     LocationPermission permission;
+  // List<String> testNames = [];
+
+
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -199,6 +205,8 @@ class _NewBookingViewState extends State<NewBookingView> {
   usererror = false;
 
   }
+
+
 
    void _scrollListener() {
     bool isTop = control.position.pixels == 0;
@@ -366,6 +374,7 @@ class _NewBookingViewState extends State<NewBookingView> {
         showGuide(context, "Please Fill All * Field");
       }
     }
+//  List<String> testNames = Provider.of<TestNamesProvider>(context).testNames;
 
     return SafeArea(
         child: GestureDetector(
@@ -402,8 +411,9 @@ class _NewBookingViewState extends State<NewBookingView> {
                         padding: const EdgeInsets.all(11),
                         child: InkWell(
                             onTap: () {
-                              NavigateController.pagePOP(context);
-                              //                      BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
+                              NavigateController.pagePushLikePop(context, HomeView());
+                              // NavigateController.pagePOP(context);
+                              // BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
                               // model.clearbookedtest();
                             },
                             child: const Icon(
@@ -417,18 +427,40 @@ class _NewBookingViewState extends State<NewBookingView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                           Padding(
+                            padding: const EdgeInsets.only(top: 10,right: 10),
+                            child: InkWell(
+                                onTap: () {
+                                  print(userNo);
+                        // NavigateController.pagePush(context,  SearchTests(BookingID: '', referalID: '', bookingType: "NewBooking", regdate: '', TestList: [],));
+
+                                  NavigateController.pagePush(
+                                      context,
+                                       AddToCartView(
+                                        bookingType: "NewBooking",
+                                        bookID: '',
+                                        regdate: '', isbooking: true,
+
+                                      )); //widget.bookingType
+                                },
+                                child: Image.asset("assets/images/cart.png",height: 23,)
+                                ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(11),
                             child: InkWell(
                                 onTap: () {
                                   print(userNo);
-                                  NavigateController.pagePush(
-                                      context,
-                                      const AddToCartView(
-                                        bookingType: "NewBooking",
-                                        bookID: '',
-                                        regdate: '',
-                                      )); //widget.bookingType
+                                    NavigateController.pagePush(context,  SearchTests(BookingID: '', referalID: '', bookingType: "NewBooking", regdate: '', TestList: [],));
+
+                                  // NavigateController.pagePush(
+                                  //     context,
+                                  //      AddToCartView(
+                                  //       bookingType: "NewBooking",
+                                  //       bookID: '',
+                                  //       regdate: '', isbooking: true,
+
+                                  //     )); //widget.bookingType
                                 },
                                 child: const Icon(
                                   Icons.add,
@@ -438,6 +470,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                         ],
                       ),
                     ),
+                    
                     const Align(
                       alignment: Alignment.center,
                       child: Column(
@@ -474,6 +507,18 @@ class _NewBookingViewState extends State<NewBookingView> {
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
+                              onChanged: (value){
+                                value.length>=11?
+                                setState((){
+                                  usererror=true;
+
+
+                                }): setState((){
+                                  usererror=false;
+
+
+                                });
+                              },
                               controller: _username,
                               style: const TextStyle(color: Colors.black54),
                               keyboardType: TextInputType.text,
@@ -483,6 +528,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                                     fontSize: 0,
                                   ),
                                   errorBorder: outline,
+                                  
                                   focusedErrorBorder: outline,
                                   enabledBorder: outline,
                                   focusedBorder: outline,
@@ -706,8 +752,8 @@ class _NewBookingViewState extends State<NewBookingView> {
 
                                 // Check for email format
                                 if (formattedText.isNotEmpty &&
-                                    (!formattedText.contains('@') ||
-                                        !formattedText.contains('.'))) {
+                                      (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                                      .hasMatch(formattedText))) {
                                   setState(() {
                                     emailerror = true;
                                   });
@@ -1693,7 +1739,7 @@ class _NewBookingViewState extends State<NewBookingView> {
         // helpText: "DOB",
         initialDate: selectedDate1,
         initialEntryMode: DatePickerEntryMode.calendarOnly,
-        firstDate: DateTime(1960, 8),
+        firstDate: DateTime(1925, 8),
         lastDate: DateTime.now(),
         builder: (context, child) {
           return Padding(

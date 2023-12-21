@@ -9,10 +9,13 @@ import '../Model/ServerURL.dart';
 import '../Model/Status.dart';
 
 
+
 class BookedServiceVM extends ChangeNotifier{
   final _myRepo = ApiInterface();
 
   ApiResponse<AppointmentAndRequestData> listBookedService= ApiResponse.loading();
+
+
 
   String cartCount = "0";
   List<Map<String,dynamic>> NewBookData= [];
@@ -23,6 +26,7 @@ class BookedServiceVM extends ChangeNotifier{
     notifyListeners();
   }
   get getCartCount=>cartCount;
+
 
 
   ApiResponse<AppointmentAndRequestData> get getBookedService => listBookedService;

@@ -62,7 +62,7 @@ print("venum : ${params["UserName"]}");
     }else{
       model.status = Status.Error;
       isNewLog ? Navigator.pop(context) : null ;
-      errorPopUp(context);
+      errorPopUp(context,'Username or Password is incorrect.\nPlease try again.');
     }
   });
  

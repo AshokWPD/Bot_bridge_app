@@ -2,7 +2,8 @@ import 'package:botbridge_green/View/Helper/ThemeCard.dart';
 import 'package:flutter/material.dart';
 
 
-errorPopUp(BuildContext context){
+errorPopUp(BuildContext context,content){
+
   return showDialog(
       context: context,
       // barrierDismissible: false,
@@ -19,7 +20,7 @@ errorPopUp(BuildContext context){
               const SizedBox(height: 20.0),
               Text('Oops!', style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.w800, color: Color(0xFFE04F5F))),
               const SizedBox(height: 20.0),
-              Text('Something went wrong.\nPlease try again.', textAlign: TextAlign.center, style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w400, color: Colors.black, )),
+              Text('$content', textAlign: TextAlign.center, style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w400, color: Colors.black, )),
               const SizedBox(height: 30.0),
               TextButton(
                 style: ButtonStyle(

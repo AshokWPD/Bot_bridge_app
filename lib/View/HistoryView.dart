@@ -263,7 +263,7 @@ class _HistoryViewState extends State<HistoryView> {
                                               initialDate: selectedDate ??
                                                   DateTime.now(),
                                               firstDate: DateTime(2023, 1, 1),
-                                              lastDate: DateTime.now(),
+                                     lastDate: DateTime.now().add(Duration(days: 30)),
                                               builder: (context, child) {
                                                 return Padding(
                                                   padding: const EdgeInsets
@@ -923,7 +923,7 @@ class _HistoryViewState extends State<HistoryView> {
                                                                   filterdate)
                                                               .isEmpty
                                                           ? const Text(
-                                                              "No Records in the Selected Date")
+                                                              "")
                                                           : const Text(
                                                               "Shortlisted Record"),
                                             ],

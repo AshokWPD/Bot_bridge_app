@@ -223,10 +223,7 @@ bool isshow=true;
                                 SignInVM foodNotifier = Provider.of<SignInVM>(context, listen: false);
                                 loginMain( context, data,foodNotifier,true);
                                 LocalDB.setLDB("UID", email.text.toString());
-                                
-
                               }
-
                             },
                             child: const Text('Sign in',style: TextStyle(color: Colors.green,fontSize: 19,fontWeight: FontWeight.w600),),
                           ),

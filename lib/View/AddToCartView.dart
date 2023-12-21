@@ -10,9 +10,9 @@ import '../Model/Status.dart';
 import '../Utils/LocalDB.dart';
 import '../Utils/NavigateController.dart';
 import '../ViewModel/BookedServiceVM.dart';
+import '../ViewModel/changeNotify.dart';
 import 'Helper/ErrorPopUp.dart';
 import 'Helper/ThemeCard.dart';
-import 'PaymentView.dart';
 import 'TabbarView.dart';
 import 'package:http/http.dart'as http;
 
@@ -21,8 +21,9 @@ import 'package:http/http.dart'as http;
 class AddToCartView extends StatefulWidget {
   final String bookingType;
   final String bookID;
+  final bool isbooking;
     final String regdate;
-  const AddToCartView({Key? key, required this.bookingType, required this.bookID, required this.regdate,  }) : super(key: key);
+   AddToCartView({Key? key, required this.bookingType, required this.bookID, required this.regdate, required this.isbooking }) : super(key: key);
 
   @override
   _AddToCartViewState createState() => _AddToCartViewState();
@@ -31,6 +32,8 @@ class AddToCartView extends StatefulWidget {
 class _AddToCartViewState extends State<AddToCartView> {
 bool isemptty=false;
   String? userNo;
+  List<String> testNames = [];
+
   bool isFetching = true;
   ScrollController control = ScrollController();
   bool floatingButtonVisible = false;
@@ -59,7 +62,6 @@ String latitude = "";
        print(longitude);
       });
     });
-
   }
 
 
@@ -104,9 +106,17 @@ String latitude = "";
   void initState() {
     // TODO: implement initState
     super.initState();
+// if(widget.isbooking==true){
+//     setState(() {
+//       widget.isbooking=false;
+//   });
+//   NavigateController.pagePush(context,  SearchTests(BookingID: widget.bookID, referalID: '', bookingType: widget.bookingType, regdate: widget.regdate, TestList: testNames,));
+
+//   }else{}
+
     getData();
     print(widget.bookingType);
-    LocalDB.getLDB('userID').then((value) {
+    LocalDB.getLDB('userID').then((value) async {
       setState(() {
         userNo = value;
       });
@@ -135,6 +145,9 @@ String latitude = "";
         //   });
         // });
       }
+          // Fetch test names using the fetchTestNames function
+
+ 
     });
   }
 
@@ -148,8 +161,8 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
   // setState(() {
   //   isemptty=true;
   // });
-
 }
+
 
     BookedServiceVM testCount = Provider.of<BookedServiceVM>(context);
     final height = MediaQuery.of(context).size.height;
@@ -200,12 +213,19 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
                                 alignment: Alignment.center,
                                 child: Text("Add Cart",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),),
                               ),
+                              
+                              
                               Positioned(
                                 right: width * 0.02,
                                 top: height * 0.02,
                                 child: GestureDetector(
                                     onTap: (){
-                                      NavigateController.pagePush(context,  SearchTests(BookingID: widget.bookID, referalID: '', bookingType: widget.bookingType, regdate: widget.regdate,));
+                                      // if(widget.bookingType=="NewBooking"){
+                                      // NavigateController.pageReplace(context,  SearchTests(BookingID: widget.bookID, referalID: '', bookingType: widget.bookingType, regdate: widget.regdate, TestList:testNames,));
+                                      // }else{
+                                      // NavigateController.pagePush(context,  SearchTests(BookingID: widget.bookID, referalID: '', bookingType: widget.bookingType, regdate: widget.regdate, TestList:testNames,));
+                                      // }
+                                       NavigateController.pagePush(context,  SearchTests(BookingID: widget.bookID, referalID: '', bookingType: widget.bookingType, regdate: widget.regdate, TestList:testNames,));
                                         // var refID = testCount.getBookedService.data!.lstPhileBotomyAppointmentAndRequest![0].primaryReffflerralType.toString();
                                         // print(refID);
                                         //
@@ -223,10 +243,11 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
                                         //     NavigateController.pagePush(context,  SearchTests(BookingID: widget.userID, referalID: '', bookingType: widget.bookingType,));
                                         //     break;
                                         // }
-          
+                                        
                                     },
                                     child: const Icon(Icons.add,color: Colors.white,size: 28)),
-                              ),
+                              )
+                              
                             ],
                           ),
                         ),
@@ -279,12 +300,19 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
                                                 Scrollbar(
                                                   thickness: 50,
                                                   child: ListView.builder(
+                        
                                                       physics:
                                                       const NeverScrollableScrollPhysics(),
                                                       shrinkWrap: true,
                                                       itemCount: VM.lstPatientResponse![0].lstTestDetails!.length,
                                                       itemBuilder:
                                                           (BuildContext context, index) {
+                                          String testName = VM.lstPatientResponse![0].lstTestDetails![index].testName.toString();
+
+                                                  testNames.add(testName);
+                                                  // Provider.of<TestNamesProvider>(context, listen: false).addTestName(testName);
+
+                                                  print(testName); 
                                                         return Align(
                                                           alignment: Alignment.centerRight,
                                                           child: Stack(
@@ -400,7 +428,7 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
                                                                           // };
                                                                           // VM.fetchBookedService(params1, VM);
                                                                         }else{
-                                                                          errorPopUp(context);
+                                                                          errorPopUp(context,'Something went wrong.\nPlease try again.');
                                                                         }
           
                                                                       });
@@ -469,6 +497,10 @@ if (data != null && data!.lstPatientResponse != null && data!.lstPatientResponse
                                                             itemCount: patient!.lstTestDetails!.length,
                                                             itemBuilder:
                                                                 (BuildContext context, index) {
+                                           String testName = patient!.lstTestDetails![index].testName.toString();
+
+                                                  testNames.add(testName);
+                                                  print(testName);
                                                                 final testDetail = patient!.lstTestDetails![index];
                                                               return Align(
                                                                 alignment: Alignment.centerRight,

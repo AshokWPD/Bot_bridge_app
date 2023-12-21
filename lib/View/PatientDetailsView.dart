@@ -503,6 +503,8 @@ final width = MediaQuery.of(context).size.width;
                                 ),
                               ),
                               SizedBox(height: height * 0.013),
+                              patient!.physicianName.toString()=='null'?
+                              SizedBox():
                               SizedBox(
                                 width: width * 0.9,
                                 height: height * 0.07,
@@ -848,7 +850,7 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
           child: Image.asset('assets/images/add_test.png',height: height*0.032,color: Colors.white,),
           backgroundColor: const Color(0xff84DF8F),
           onTap: () {
-            NavigateController.pagePush(context,AddToCartView( bookingType: widget.bookingType, bookID: widget.bookingID, regdate: widget.regdate, ));
+            NavigateController.pagePush(context,AddToCartView( bookingType: widget.bookingType, bookID: widget.bookingID, regdate: widget.regdate, isbooking: false, ));
           },
 
        
@@ -974,16 +976,16 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
       else{
         print("errorpop");
         Navigator.pop(context);
-        errorPopUp(context);
+        errorPopUp(context,'Something went wrong.\nPlease try again.');
       }
     }).catchError((error){
       print("errorrrrrrrrr $error");
       Navigator.pop(context);
-      errorPopUp(context);
+      errorPopUp(context,'Something went wrong.\nPlease try again.');
     }).onError((error, stackTrace) {
       print(error);
       Navigator.pop(context);
-      errorPopUp(context);
+      errorPopUp(context,'Something went wrong.\nPlease try again.');
     });
   }
 

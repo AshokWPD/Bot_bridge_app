@@ -15,6 +15,7 @@ import 'ViewModel/ReferalDataVM.dart';
 import 'ViewModel/SampleWiseServiceVM.dart';
 import 'ViewModel/ServiceDetailsVM.dart';
 import 'ViewModel/SignInVM.dart';
+import 'ViewModel/changeNotify.dart';
 
 
 
@@ -42,6 +43,8 @@ Future<void> main() async {
             ChangeNotifierProvider<BookedServiceVM>(create: (_) => BookedServiceVM()),
             ChangeNotifierProvider<SampleWiseServiceDataVM>(create: (_) => SampleWiseServiceDataVM()),
             ChangeNotifierProvider<ExistingPatientVM>(create: (_) => ExistingPatientVM()),
+      //       ChangeNotifierProvider(
+      // create: (context) => TestNamesProvider(),)
           ],
           child: const MyApp()
       ));

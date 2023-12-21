@@ -13,8 +13,9 @@ class SearchTests extends StatefulWidget {
   final String BookingID;
   final String bookingType;
     final String regdate;
+    final List<String>TestList;
 
-  const SearchTests({Key? key, required this.BookingID, required this.referalID, required this.bookingType, required this.regdate}) : super(key: key);
+   SearchTests({Key? key, required this.BookingID, required this.referalID, required this.bookingType, required this.regdate, required this.TestList}) : super(key: key);
 
   @override
   _SearchTestsState createState() => _SearchTestsState();
@@ -84,9 +85,23 @@ handleTabSelection() {
                   child: Row(
                     children: [
                       IconButton(onPressed: (){
-                        widget.bookingType=="NewBooking"?
-                        Navigator.pop(context):
-                        NavigateController.pagePush(context, AddToCartView(bookingType: widget.bookingType, bookID: widget.BookingID, regdate: widget.regdate,));
+                        if(widget.bookingType=="NewBooking"){
+                          print("============================");
+                          NavigateController.pagePOP(context);
+                          //  NavigateController.pagePush(
+                          //             context,
+                          //              AddToCartView(
+                          //               bookingType: "NewBooking",
+                          //               bookID: '',
+                          //               regdate: '', isbooking: false,
+
+                          //             ));
+                        }else{
+                        NavigateController.pagePush(context, AddToCartView(bookingType: widget.bookingType, bookID: widget.BookingID, regdate: widget.regdate, isbooking: false,));
+
+                        }
+                        
+                       
                       }, icon: const Icon(Icons.arrow_back_ios,color: Colors.white,)),
                       SizedBox(
                         height: height * 0.06,
@@ -135,6 +150,28 @@ handleTabSelection() {
                           ),
                         ),
                       ), const Spacer(),
+                      // InkWell(
+                      //   onTap: (){
+                      //        if(widget.bookingType=="NewBooking"){
+                      //     print("============================");
+                      //     // NavigateController.pagePOP(context);
+                      //      NavigateController.pagePush(
+                      //                 context,
+                      //                  AddToCartView(
+                      //                   bookingType: "NewBooking",
+                      //                   bookID: '',
+                      //                   regdate: '', isbooking: true,
+
+                      //                 ));
+                      //   }else{
+                      //   NavigateController.pagePush(context, AddToCartView(bookingType: widget.bookingType, bookID: widget.BookingID, regdate: widget.regdate, isbooking: false,));
+
+                      //   }
+                          
+                      //   },
+                      //   child: Image.asset("assets/images/cart.png",height: 25,)),
+                      // Spacer(),
+
                     
                     const SizedBox(width: 8),
                     ],
@@ -176,10 +213,10 @@ handleTabSelection() {
                   child:  TabBarView(
                     controller: tabController,
                       children: [
-                        ServicesListView(serviceType: '', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
-                        ServicesListView(serviceType: "P", BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
-                        ServicesListView(serviceType: 'T', BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text),
-                        ServicesListView(serviceType: 'G', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text)
+                        ServicesListView(serviceType: '', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text, testlist: widget.TestList,),
+                        ServicesListView(serviceType: "P", BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text, testlist: widget.TestList),
+                        ServicesListView(serviceType: 'T', BookingID: widget.BookingID, refID:widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text, testlist: widget.TestList,),
+                        ServicesListView(serviceType: 'G', BookingID: widget.BookingID, refID: widget.referalID, bookingType: widget.bookingType,searchkey:searchtestController.text, testlist: widget.TestList,)
                   ]),
                 )
               ],

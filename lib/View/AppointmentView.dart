@@ -13,8 +13,6 @@ import '../ViewModel/AppointmentListVM.dart';
 import 'Helper/ThemeCard.dart';
 import 'package:http/http.dart' as http;
 
-
-
 class AppointmentView extends StatefulWidget {
   const AppointmentView({super.key});
 
@@ -48,6 +46,7 @@ class _AppointmentViewState extends State<AppointmentView> {
   bool nodata = false;
   var searchdate;
   DateTime? picked;
+  // Get the current date
 
   // Define a method to fetch data and update the list
   Future<void> fetchData() async {
@@ -151,6 +150,7 @@ class _AppointmentViewState extends State<AppointmentView> {
       fetchData();
     });
     super.initState();
+    // Calculate the date one month from now
   }
 
   bool isNumber(String input) {
@@ -273,7 +273,8 @@ class _AppointmentViewState extends State<AppointmentView> {
                                               initialDate: selectedDate ??
                                                   DateTime.now(),
                                               firstDate: DateTime(2023, 1, 1),
-                                              lastDate: DateTime.now(),
+                                              lastDate: DateTime.now().add(
+                                                  const Duration(days: 30)),
                                               builder: (context, child) {
                                                 return Padding(
                                                   padding: const EdgeInsets
@@ -335,8 +336,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                               ],
                             ),
                           ],
-                        )
-                        ),
+                        )),
                     Expanded(
                       child: nodata
                           ? SizedBox(
@@ -919,7 +919,11 @@ class _AppointmentViewState extends State<AppointmentView> {
                                                                       .toString(),
                                                                   desiredDateFormat) ==
                                                               filterdate)
-                                                          .length==0? Text("No Records in the Selected Date"):Text("Shortlisted Record"),
+                                                          .isEmpty
+                                                      ? const Text(
+                                                          "")
+                                                      : const Text(
+                                                          "Shortlisted Record"),
                                         ],
                                       ),
                                       SizedBox(

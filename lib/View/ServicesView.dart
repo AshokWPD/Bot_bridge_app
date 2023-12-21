@@ -24,7 +24,8 @@ class ServicesListView extends StatefulWidget {
   final String bookingType;
   final String refID;
   final String searchkey;
-  const ServicesListView({Key? key, required this.serviceType, required this.BookingID, required this.refID, required this.bookingType,required this.searchkey}) : super(key: key);
+  final List<String>testlist;
+   ServicesListView({Key? key, required this.serviceType, required this.BookingID, required this.refID, required this.bookingType,required this.searchkey, required this.testlist, }) : super(key: key);
 
   @override
   _ServicesListViewState createState() => _ServicesListViewState();
@@ -62,7 +63,7 @@ bool stoploading =false;
   @override
   void initState() {
     getData();
- 
+ print(widget.testlist);
 
     fetchData(false);
     super.initState();
@@ -139,10 +140,28 @@ bool stoploading =false;
                         onTap: () {
                           print("its go to new booking");
                             if(widget.bookingType == "NewBooking"){
-                           addService(tests,index,height,width );}
+                               if(widget.testlist.contains(tests[index].testName.toString()))
+                               {                             
+                                 test_alert( "Test Already Added!");}
+
+
+                           else{                           
+                            addService(tests,index,height,width );
+
+                           }
+                           }
                            else{
-                            print("its go to add more test");
+                             print(widget.testlist);
+                              if(widget.testlist.contains(tests[index].testName.toString()))
+                               {     
+                             test_alert( "Test Already Added!");
+
+                            }
+                             else{
+                                print("its go to add more test");
                             addmoretest(tests, index, height, width);
+                           }
+
                            }
                         },
                         child: Padding(
@@ -410,15 +429,27 @@ bool stoploading =false;
     );
   }
 
-    List<LstService> addedTests = [];
+Future<bool> isTestAlreadyStoredLocally(String? testName) async {
+  List<String> storedTestNames = await LocalDB.getListLDB('addedTestNames');
+  return storedTestNames.any((name) => name == testName);
+}
 
-  addmoretest(List<LstService> data,index,height,width)async{
- if (isTestadded(data[index])) {
+
+
+    List<LstService> addedTests = [];
+List<String> addedTestNames = [];  // Declare a list to store the added test names
+
+addmoretest(List<LstService> data, index, height, width) async {
+  if (isTestadded(data[index])) {
             test_alert( "Test Already Added!");
 
   }
   else{
-          addedTests.add(data[index]);
+    addedTests.add(data[index]);
+
+    // Add the test name to the local storage list
+    addedTestNames.add(data[index].testName ?? '');
+    await LocalDB.setListLDB('addedTestNames', addedTestNames);
 
         var venueNo = await LocalDB.getLDB("venueNo") ?? "";
     var venueBranchNo = await LocalDB.getLDB("venueBranchNo") ?? "";
@@ -478,15 +509,21 @@ bool stoploading =false;
     return addedTests.contains(test);
   }
     List<LstService> selectedTests = [];
-  addService(List<LstService> data,index,height,width ) async {
-  // final List<Map<String, dynamic>> newBookData = Provider.of<BookedServiceVM>(context, listen: false).getNewBookData;
 
+addService(List<LstService> data, index, height, width) async {
+  // Retrieve the local list of added test names
+  List<String> localTestNames = await LocalDB.getListLDB('addedTestNames');
 
-    if (isTestSelected(data[index])) {
-            test_alert( "Test Already Added!");
-  }
-  else{
-      selectedTests.add(data[index]);
+  // Check if the test name is already in the local list or selectedTests
+  if (localTestNames.contains(data[index].testName) || isTestSelected(data[index])) {
+    test_alert("Test Already Added!");
+  } else {
+    selectedTests.add(data[index]);
+    // Assuming you want to store the test name in the addedTestNames list
+    addedTestNames.add(data[index].testName ?? '');
+
+    // Store the updated list in local storage
+    await LocalDB.setListLDB('addedTestNames', addedTestNames);
 
      print("start --------------");
     print(data[index].testNo);

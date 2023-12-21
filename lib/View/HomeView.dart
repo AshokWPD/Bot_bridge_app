@@ -61,6 +61,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
   void initState() {
             BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
 model.clearbookedtest();
+LocalDB.deleteListLDB('addedTestNames');
 
     getData();
     // venueNo=venueNo;
