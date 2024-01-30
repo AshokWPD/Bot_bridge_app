@@ -923,7 +923,7 @@ class _NewRequestViewState extends State<NewRequestView> {
                                               : iserror
                                                   ? const Center(
                                                       child: Text(
-                                                          "No Records found!!!"))
+                                                          "No New Request found!!!"))
                                                   : _lastTestDetails!
                                                           .where((item) =>
                                                               formatDateString(

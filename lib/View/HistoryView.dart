@@ -339,7 +339,7 @@ class _HistoryViewState extends State<HistoryView> {
                                   height: height - 170,
                                   width: width,
                                   child: const Center(
-                                      child: Text("Somthing went wrong")),
+                                      child: Text("No history records found")),
                                 )
                               : isFetching
                                   ? SizedBox(
@@ -913,7 +913,7 @@ class _HistoryViewState extends State<HistoryView> {
                                                   : iserror
                                                       ? const Center(
                                                           child: Text(
-                                                              "No Records found!!!"))
+                                                              "No history records found"))
                                                       : _lastTestDetails!
                                                               .where((item) =>
                                                                   formatDateString(

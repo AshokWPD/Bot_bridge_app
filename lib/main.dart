@@ -46,7 +46,7 @@ Future<void> main() async {
       //       ChangeNotifierProvider(
       // create: (context) => TestNamesProvider(),)
           ],
-          child: const MyApp()
+          child:  MyApp()
       ));
 }
 
@@ -54,7 +54,8 @@ Future<void> main() async {
 
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+   MyApp({Key? key}) : super(key: key);
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
       
         primarySwatch: Colors.blue,
       ),
+      navigatorObservers: [routeObserver],
       routes: {
         // When navigating to the "homeScreen" route, build the HomeScreen widget.
         'ExistedPatient': (context) => const ExistedPatientView(),

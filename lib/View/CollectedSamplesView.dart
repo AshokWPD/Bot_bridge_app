@@ -309,7 +309,7 @@ bool isNumber(String input) {
                                       Container(
                                        height: height-170,width: width,
                           
-                                      child: Center(child: Text("Somthing went wrong")),):
+                                      child: Center(child: Text("No New Sample")),):
                                             isFetching?
                                              Container(
                                               height: height-170,width: width,
@@ -634,7 +634,7 @@ bool isNumber(String input) {
                                           :
                           
                           
-                                     iserror?const Center(child: Text("No Records found!!!"))
+                                     iserror?const Center(child: Text("No Samples found!!!"))
                                           
                                           :_lastTestDetails!
                                                           .where((item) =>

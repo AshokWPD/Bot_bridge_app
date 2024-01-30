@@ -28,6 +28,38 @@ class BookedServiceVM extends ChangeNotifier{
   get getCartCount=>cartCount;
 
 
+  int getLstTestDetailsLength() {
+    if (listBookedService.data != null &&
+        listBookedService.data!.lstPatientResponse != null &&
+        listBookedService.data!.lstPatientResponse!.isNotEmpty &&
+        listBookedService.data!.lstPatientResponse![0].lstTestDetails != null) {
+      return listBookedService.data!.lstPatientResponse![0].lstTestDetails!.length;
+    } else {
+      return 0;
+    }
+  }
+
+
+List<String> getTestNames() {
+  List<String> testNames = [];
+
+  if (listBookedService.data != null &&
+      listBookedService.data!.lstPatientResponse != null &&
+      listBookedService.data!.lstPatientResponse!.isNotEmpty &&
+      listBookedService.data!.lstPatientResponse![0].lstTestDetails != null) {
+    
+    for (var testDetail in listBookedService.data!.lstPatientResponse![0].lstTestDetails!) {
+      if (testDetail.testName != null) {
+        testNames.add(testDetail.testName!);
+      }
+    }
+  }
+
+  return testNames;
+}
+
+  
+
 
   ApiResponse<AppointmentAndRequestData> get getBookedService => listBookedService;
 

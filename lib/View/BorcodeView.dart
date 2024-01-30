@@ -66,7 +66,7 @@ class _BarcodePageState extends State<BarcodePage> {
             "The patient status Updated!", const AppointmentView());
       } else {
         Navigator.pop(context);
-        errorPopUp(context,'Something went wrong.\nPlease try again.');
+        errorPopUp(context, 'Something went wrong.\nPlease try again.');
       }
     });
   }
@@ -400,7 +400,17 @@ class _BarcodePageState extends State<BarcodePage> {
       ScanMode.BARCODE, // Specify the scan mode
     );
 
-    if (barcode != '') {
+    if (barcode == '-1') {
+     Fluttertoast.showToast(
+        msg: "Failed to Scan",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red, // Use an error color.
+        textColor: Colors.white,
+        fontSize: 14.0,
+      );
+    } else if (barcode != '') {
       print("Scanned barcode: $barcode");
       confirmPOPUP(context, hight, width, "confirm Barcode upload", testname,
           bookingid, sampleno, barcode);
@@ -416,7 +426,7 @@ class _BarcodePageState extends State<BarcodePage> {
         textColor: Colors.white,
         fontSize: 14.0,
       );
-    }
+    } 
   }
 
   void uploadBarcode(
@@ -462,7 +472,7 @@ class _BarcodePageState extends State<BarcodePage> {
     BuildContext context,
     String title,
     String bookingID,
-    hight, 
+    hight,
     width,
     testname,
     sampleno,

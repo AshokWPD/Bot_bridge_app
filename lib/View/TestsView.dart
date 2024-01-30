@@ -60,7 +60,7 @@ class _TestsViewViewState extends State<TestsViewView> {
           SizedBox(height: height * 0.06),
           InkWell(
             onTap: (){
-              NavigateController.pagePush(context,  SearchTests(referalID: '', BookingID: '', bookingType: '', regdate: '', TestList: [],));
+              NavigateController.pagePush(context,  SearchTests(referalID: '', BookingID: '', bookingType: '', regdate: '', TestList: [], ontap: () {  },));
             },
             child: Container(
               height: height * 0.08,

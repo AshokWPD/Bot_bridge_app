@@ -85,14 +85,14 @@ bool stoploading =false;
       "serviceName": widget.searchkey,//widget.searchkey,
       "clientNo": 0,
       "physicianNo": 0,
-      "pageIndex": 1,
+      "pageIndex": model.getNextPage,
         "venueNo": 1,
   "venueBranchNo": 1, //model.nextPage
     };
     print("${model.getNextPage}");
     print(model.getNextPage);
     if (widget.refID.isNotEmpty) {
-      // params["CustomerID"] = widget.refID;
+       params["CustomerID"] = widget.refID;
     }
     if (isNewPage) {
       _api.fetchServiceDetailsNext(params, model);
@@ -127,9 +127,20 @@ bool stoploading =false;
             List<LstService> tests = viewModel.getListData.toList();
             return  Scaffold(
               body: SmartRefresher(
-                controller: _refreshController,
+                 controller: _refreshController,
                 enablePullDown: false,
-                enablePullUp: false,
+                enablePullUp: true,
+                onRefresh: () {},
+                onLoading: () {
+                  setState(() {
+                    value = false;
+                    page = viewModel.nextPage;
+                  });
+                  fetchData(true).then((value) {
+                    print("load completed");
+                    _refreshController.loadComplete();
+                  });
+                },
              
                 child: ListView.builder(
                     // physics: const NeverScrollableScrollPhysics(),
@@ -140,7 +151,7 @@ bool stoploading =false;
                         onTap: () {
                           print("its go to new booking");
                             if(widget.bookingType == "NewBooking"){
-                               if(widget.testlist.contains(tests[index].testName.toString()))
+                              if(widget.testlist.contains(tests[index].testName.toString()))
                                {                             
                                  test_alert( "Test Already Added!");}
 
@@ -581,7 +592,7 @@ addService(List<LstService> data, index, height, width) async {
 
 
     );
-  }
+ }
 
    
   }

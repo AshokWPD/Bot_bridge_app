@@ -6,10 +6,7 @@ import 'package:botbridge_green/View/HomeView.dart';
 import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import '../Model/Status.dart';
 import '../Utils/NavigateController.dart';
-import '../ViewModel/AppointmentListVM.dart';
 import 'Helper/ThemeCard.dart';
 import 'package:http/http.dart' as http;
 
@@ -160,12 +157,7 @@ class _AppointmentViewState extends State<AppointmentView> {
 
   @override
   Widget build(BuildContext context) {
-    //   final patient = data!.lstPatientResponse?.isNotEmpty == true
-    // ? data!.lstPatientResponse![0]
-    // : null;
-    //       print(patient!.gender);
-    // final patienttest= patient.lstTestDetails?.isNotEmpty==true?
-    // patient.lstTestDetails![0]:null;
+ 
 
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
@@ -343,7 +335,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                               height: height - 170,
                               width: width,
                               child: const Center(
-                                  child: Text("Somthing went wrong")),
+                                  child: Text("No New Appointments")),
                             )
                           : isFetching
                               ? SizedBox(
@@ -911,7 +903,7 @@ class _AppointmentViewState extends State<AppointmentView> {
                                               : iserror
                                                   ? const Center(
                                                       child: Text(
-                                                          "No Records found!!!"))
+                                                          "No Appointments found!!!"))
                                                   : _lastTestDetails!
                                                           .where((item) =>
                                                               formatDateString(

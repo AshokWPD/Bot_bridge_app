@@ -850,7 +850,7 @@ PaymentView(bookingID: widget.bookingID, ScreenType: widget.screenType, bookingT
           child: Image.asset('assets/images/add_test.png',height: height*0.032,color: Colors.white,),
           backgroundColor: const Color(0xff84DF8F),
           onTap: () {
-            NavigateController.pagePush(context,AddToCartView( bookingType: widget.bookingType, bookID: widget.bookingID, regdate: widget.regdate, isbooking: false, ));
+            NavigateController.pagePush(context,AddToCartView( bookingType: widget.bookingType, bookID: widget.bookingID, regdate: widget.regdate, isbooking: false, ontap: () {  }, ));
           },
 
        

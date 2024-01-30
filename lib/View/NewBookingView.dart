@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:botbridge_green/Model/ServerURL.dart';
 import 'package:botbridge_green/Utils/NavigateController.dart';
 import 'package:botbridge_green/View/HomeView.dart';
-import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,17 +13,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../Model/ApiClient.dart';
-import '../Model/Response/AppoitmentAndRequestData.dart';
-import '../Model/Status.dart';
 import '../Utils/LocalDB.dart';
-// import '../ViewModel/BookedServiceVM.dart';
 import '../ViewModel/BookedServiceVM.dart';
-import '../ViewModel/changeNotify.dart';
 import 'AddToCartView.dart';
 import 'Helper/ThemeCard.dart';
 import 'PaymentView.dart';
 import 'package:http/http.dart' as http;
-
 import 'TabbarView.dart';
 
 class NewBookingView extends StatefulWidget {
@@ -33,6 +27,8 @@ class NewBookingView extends StatefulWidget {
   @override
   _NewBookingViewState createState() => _NewBookingViewState();
 }
+
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 class _NewBookingViewState extends State<NewBookingView> {
   final _formkey = GlobalKey<FormState>();
@@ -71,6 +67,8 @@ class _NewBookingViewState extends State<NewBookingView> {
   String txtdate = '';
   bool emailerror = false;
   bool ageerror = false;
+  bool isGenderAutoUpdated = false;
+
   GoogleMapController? mapController;
   Set<Marker> markers = {};
   final Completer<GoogleMapController> _controller = Completer();
@@ -79,9 +77,7 @@ class _NewBookingViewState extends State<NewBookingView> {
     print("Start2");
     bool serviceEnabled;
     LocationPermission permission;
-  // List<String> testNames = [];
-
-
+    // List<String> testNames = [];
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -145,6 +141,22 @@ class _NewBookingViewState extends State<NewBookingView> {
     }
   }
 
+//   // In another page where you have an instance of BookedServiceVM
+// int testDetailsLength = bookedServiceVM.getTestDetailsLength();
+// print("Test Details Length: $testDetailsLength");
+
+//   int getTestDetailsLength() {
+//   if (listBookedService.status == Status.Completed &&
+//       listBookedService.data != null &&
+//       listBookedService.data!.lstPatientResponse != null &&
+//       listBookedService.data!.lstPatientResponse!.isNotEmpty &&
+//       listBookedService.data!.lstPatientResponse![0].lstTestDetails != null) {
+//     return listBookedService.data!.lstPatientResponse![0].lstTestDetails!.length;
+//   } else {
+//     return 0;
+//   }
+// }
+
   ScrollController control = ScrollController();
   bool floatingButtonVisible = false;
   String? selectedGender;
@@ -187,28 +199,58 @@ class _NewBookingViewState extends State<NewBookingView> {
     );
   }
 
+  int listOfTestcount = 0;
+
+  void didPop() {
+    BookedServiceVM model =
+        Provider.of<BookedServiceVM>(context, listen: false);
+    int lengthOfTestDetails = model.getLstTestDetailsLength();
+    print("Length of lstTestDetails: $lengthOfTestDetails");
+
+    setState(() {
+      listOfTestcount = lengthOfTestDetails;
+    });
+  }
+
+//   void didPop(int count) {
+
+//      BookedServiceVM model =
+//           Provider.of<BookedServiceVM>(context, listen: false);
+//           int lengthOfTestDetails = model.getLstTestDetailsLength();
+// print("Length of lstTestDetails: $lengthOfTestDetails");
+
+// setState(() {
+//        listOfTestcount = lengthOfTestDetails;
+
+// });
+
+//   }
+
   @override
   void initState() {
-        super.initState();
-
+    super.initState();
+    listOfTestcount = 0;
+    // BookedServiceVM model =
+    //     Provider.of<BookedServiceVM>(context, listen: false);
+    // setState(() {
+    //   listOfTestcount = model.getNewBookData.length;
+    // });
     emailID.text = '';
     txtdate = dateformatnow.format(DateTime.now()).toString();
     getData();
-      control.addListener(_scrollListener);
+    control.addListener(_scrollListener);
 
-   Future.delayed(Duration.zero, () {
-    BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
-    model.fetchBookedService({}, model, true);
-    startFetching();
-  });
+    Future.delayed(Duration.zero, () {
+      BookedServiceVM model =
+          Provider.of<BookedServiceVM>(context, listen: false);
+      model.fetchBookedService({}, model, true);
+      startFetching();
+    });
 
-  usererror = false;
-
+    usererror = false;
   }
 
-
-
-   void _scrollListener() {
+  void _scrollListener() {
     bool isTop = control.position.pixels == 0;
     if (isTop) {
       setState(() {
@@ -283,12 +325,13 @@ class _NewBookingViewState extends State<NewBookingView> {
         setState(() {
           userNo = value;
         });
+        print(listOfTest.length);
         // DateFormat appDate =
         // DateFormat("yyyy-MM-dd HH:mm:ss");
         // DateFormat appTime =
         // DateFormat("yyyy-MM-dd HH:mm:ss");
         // if (_formkey.currentState!.validate()) {
-        if (listOfTest.isNotEmpty) {
+        if (listOfTest.isNotEmpty&& listOfTestcount!=0) {
           LocalDB.getLDB('userID').then((value) {
             Map<String, dynamic> params = {
               "titleCode": titleType,
@@ -391,7 +434,7 @@ class _NewBookingViewState extends State<NewBookingView> {
           child: Column(
             children: [
               Container(
-                height: height * 0.07,
+                height: height * 0.059,
                 width: width,
                 decoration: BoxDecoration(
                     color: CustomTheme.background_green,
@@ -411,7 +454,8 @@ class _NewBookingViewState extends State<NewBookingView> {
                         padding: const EdgeInsets.all(11),
                         child: InkWell(
                             onTap: () {
-                              NavigateController.pagePushLikePop(context, HomeView());
+                              NavigateController.pagePushLikePop(
+                                  context, const HomeView());
                               // NavigateController.pagePOP(context);
                               // BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
                               // model.clearbookedtest();
@@ -427,31 +471,69 @@ class _NewBookingViewState extends State<NewBookingView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                           Padding(
-                            padding: const EdgeInsets.only(top: 10,right: 10),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10, right: 10),
                             child: InkWell(
                                 onTap: () {
                                   print(userNo);
-                        // NavigateController.pagePush(context,  SearchTests(BookingID: '', referalID: '', bookingType: "NewBooking", regdate: '', TestList: [],));
+                                  // NavigateController.pagePush(context,  SearchTests(BookingID: '', referalID: '', bookingType: "NewBooking", regdate: '', TestList: [],));
 
                                   NavigateController.pagePush(
                                       context,
-                                       AddToCartView(
+                                      AddToCartView(
                                         bookingType: "NewBooking",
                                         bookID: '',
-                                        regdate: '', isbooking: true,
-
+                                        regdate: '',
+                                        isbooking: true,
+                                        ontap: didPop,
                                       )); //widget.bookingType
                                 },
-                                child: Image.asset("assets/images/cart.png",height: 23,)
-                                ),
+                                child: SizedBox(
+                                  height: height * 0.5,
+                                  width: width * 0.09,
+                                  child: Stack(children: [
+                                    Image.asset(
+                                      "assets/images/cart.png",
+                                      height: 23,
+                                    ),
+                                    Positioned(
+                                      top: 8,
+                                      left: 14,
+                                      child: Container(
+                                        height: height * 0.025,
+                                        width: width * 0.05,
+                                        decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(30)),
+                                            // shape: BoxShape.circle,
+                                            color: Colors.black),
+                                        child: Center(
+                                            child: Text(
+                                          "$listOfTestcount",
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        )),
+                                      ),
+                                    ),
+                                  ]),
+                                )),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(11),
                             child: InkWell(
                                 onTap: () {
                                   print(userNo);
-                                    NavigateController.pagePush(context,  SearchTests(BookingID: '', referalID: '', bookingType: "NewBooking", regdate: '', TestList: [],));
+                                  NavigateController.pagePush(
+                                      context,
+                                      SearchTests(
+                                        BookingID: '',
+                                        referalID: '',
+                                        bookingType: "NewBooking",
+                                        regdate: '',
+                                        TestList:  [],
+                                        ontap: didPop,
+                                      ));
 
                                   // NavigateController.pagePush(
                                   //     context,
@@ -470,7 +552,6 @@ class _NewBookingViewState extends State<NewBookingView> {
                         ],
                       ),
                     ),
-                    
                     const Align(
                       alignment: Alignment.center,
                       child: Column(
@@ -507,17 +588,14 @@ class _NewBookingViewState extends State<NewBookingView> {
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
-                              onChanged: (value){
-                                value.length>=11?
-                                setState((){
-                                  usererror=true;
-
-
-                                }): setState((){
-                                  usererror=false;
-
-
-                                });
+                              onChanged: (value) {
+                                value.length >= 11
+                                    ? setState(() {
+                                        usererror = true;
+                                      })
+                                    : setState(() {
+                                        usererror = false;
+                                      });
                               },
                               controller: _username,
                               style: const TextStyle(color: Colors.black54),
@@ -528,7 +606,6 @@ class _NewBookingViewState extends State<NewBookingView> {
                                     fontSize: 0,
                                   ),
                                   errorBorder: outline,
-                                  
                                   focusedErrorBorder: outline,
                                   enabledBorder: outline,
                                   focusedBorder: outline,
@@ -611,12 +688,20 @@ class _NewBookingViewState extends State<NewBookingView> {
                                     setState(() {
                                       selectedTitle = titleList.toString();
                                       titleType = titleList.toString();
-                                      genderType =
-                                          titleToGenderMapping[titleList] ?? "";
 
-                                      // Update the gender selection based on the selected title
-                                      selectedGender =
-                                          titleToGenderMapping[titleList];
+                                      // Update the gender selection only if it hasn't been manually updated
+                                      if (titleee.contains(titleType)) {
+                                        genderType =
+                                            titleToGenderMapping[titleList] ??
+                                                "";
+                                        selectedGender =
+                                            titleToGenderMapping[titleList];
+                                        isGenderAutoUpdated = true;
+                                      } else {
+                                        isGenderAutoUpdated = false;
+                                      }
+
+                                      // Reset the flag after updating the gender based on title
                                     });
                                   },
                                   value: selectedTitle,
@@ -752,8 +837,9 @@ class _NewBookingViewState extends State<NewBookingView> {
 
                                 // Check for email format
                                 if (formattedText.isNotEmpty &&
-                                      (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                                      .hasMatch(formattedText))) {
+                                    (!RegExp(
+                                            r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+                                        .hasMatch(formattedText))) {
                                   setState(() {
                                     emailerror = true;
                                   });
@@ -853,64 +939,77 @@ class _NewBookingViewState extends State<NewBookingView> {
                               SizedBox(
                                 width: width * 0.4,
                                 height: height * 0.07,
-                                child: DropdownButtonFormField2(
-                                  dropdownDecoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  focusColor: Colors.white,
-                                  validator: (value) {
-                                    if (selectedGender == null) {
-                                      return "Please select Gender";
-                                    }
-                                    return null;
-                                  },
-                                  icon: const Padding(
-                                    padding:
-                                        EdgeInsets.only(bottom: 7, right: 8),
-                                    child: Icon(Icons.keyboard_arrow_down),
-                                  ),
-                                  style: const TextStyle(color: Colors.black54),
-                                  decoration: InputDecoration(
-                                      errorStyle: const TextStyle(
-                                        color: Colors.transparent,
-                                        fontSize: 0,
-                                      ),
-                                      errorBorder: outline,
-                                      focusedErrorBorder: outline,
-                                      enabledBorder: outline,
-                                      focusedBorder: outline,
-                                      label: const Text(
-                                        'Gender*',
-                                        style: TextStyle(
-                                            color: Colors.black54,
-                                            fontSize: 14),
-                                      )),
-                                  selectedItemBuilder: (BuildContext context) {
-                                    return genderList
-                                        .map<Widget>((Gender item) {
-                                      return Text(item.gender,
+                                child: AbsorbPointer(
+                                  absorbing: isGenderAutoUpdated,
+                                  child: DropdownButtonFormField2(
+                                    dropdownDecoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    focusColor: Colors.white,
+                                    validator: (value) {
+                                      if (selectedGender == null) {
+                                        return "Please select Gender";
+                                      }
+                                      return null;
+                                    },
+                                    icon: const Padding(
+                                      padding:
+                                          EdgeInsets.only(bottom: 7, right: 8),
+                                      child: Icon(Icons.keyboard_arrow_down),
+                                    ),
+                                    style:
+                                        const TextStyle(color: Colors.black54),
+                                    decoration: InputDecoration(
+                                        errorStyle: const TextStyle(
+                                          color: Colors.transparent,
+                                          fontSize: 0,
+                                        ),
+                                        errorBorder: outline,
+                                        focusedErrorBorder: outline,
+                                        enabledBorder: outline,
+                                        focusedBorder: outline,
+                                        label: const Text(
+                                          'Gender*',
+                                          style: TextStyle(
+                                              color: Colors.black54,
+                                              fontSize: 14),
+                                        )),
+                                    selectedItemBuilder:
+                                        (BuildContext context) {
+                                      return genderList
+                                          .map<Widget>((Gender item) {
+                                        return Text(item.gender,
+                                            style: const TextStyle(
+                                                color: Colors.black));
+                                      }).toList();
+                                    },
+                                    items: genderList.map((Gender item) {
+                                      return DropdownMenuItem<String>(
+                                        value: item.gender,
+                                        // onTap: () {
+                                        //   if (!isGenderAutoUpdated) {
+                                        //     return;
+                                        //   }
+                                        // },
+                                        child: Text(
+                                          item.gender,
                                           style: const TextStyle(
-                                              color: Colors.black));
-                                    }).toList();
-                                  },
-                                  items: genderList.map((Gender item) {
-                                    return DropdownMenuItem<String>(
-                                      value: item.gender,
-                                      child: Text(
-                                        item.gender,
-                                        style: const TextStyle(
-                                            fontSize: 13, color: Colors.black),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (genderList) {
-                                    setState(() {
-                                      selectedGender = genderList.toString();
-                                      genderType = genderList.toString();
-                                    });
-                                  },
-                                  value: selectedGender,
-                                  isExpanded: true,
+                                              fontSize: 13,
+                                              color: Colors.black),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (genderList) {
+                                      setState(() {
+                                        selectedGender = genderList.toString();
+                                        genderType = genderList.toString();
+
+                                        // Set the flag to true when the gender is manually updated
+                                      });
+                                    },
+                                    value: selectedGender,
+                                    isExpanded: false,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1082,9 +1181,9 @@ class _NewBookingViewState extends State<NewBookingView> {
                                 width: width * 0.4,
                                 height: height * 0.07,
                                 child: TextFormField(
-                                  onChanged: (value) {
+                                  onChanged: (value) async{
                                     if (value.length == 6) {
-                                      fetchpin(value.toString());
+                                     await fetchpin(value.toString());
                                     }
                                   },
                                   textInputAction: TextInputAction.next,
@@ -1501,11 +1600,15 @@ class _NewBookingViewState extends State<NewBookingView> {
                   SizedBox(width: width * 0.03),
                   InkWell(
                     onTap: () {
+                      // didPop();
 //                        BookedServiceVM model = Provider.of<BookedServiceVM>(context, listen: false);
 // model.clearbookedtest();
-                      NavigateController.pagePOP(context);
+                      // NavigateController.pagePOP(context);
+                      NavigateController.pageReplace(
+                          context, const NewBookingView());
                       setState(() {
                         iscompleted = true;
+                        listOfTestcount = 0;
                       });
                       // NavigateController.pagePOP(context);
                     },
@@ -1545,6 +1648,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                     doctorName.text = data['name'].toString();
                     setState(() {
                       physicianName = data['name'].toString();
+                      physicanNo = int.parse(data['id'].toString());
                     });
                   }
                   print(value);
@@ -1802,6 +1906,8 @@ final List<Gender> genderList = [
   Gender("Male"),
   Gender("Female"),
 ];
+
+List<String> titleee = ["Mr. ", "Mrs. ", "Ms. ", "Miss. ", "Sis. "];
 
 final Map<String, String> titleToGenderMapping = {
   "Mr. ": "Male",
