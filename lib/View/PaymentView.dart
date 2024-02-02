@@ -1,18 +1,12 @@
 import 'dart:convert';
-
 import 'package:botbridge_green/Model/Response/AppoitmentAndRequestData.dart';
 import 'package:botbridge_green/Model/ServerURL.dart';
 import 'package:botbridge_green/Utils/LocalDB.dart';
 import 'package:botbridge_green/View/AppointmentView.dart';
-import 'package:botbridge_green/View/HomeView.dart';
-import 'package:botbridge_green/View/PatientDetailsView.dart';
 import 'package:botbridge_green/View/upipayView.dart';
-import 'package:botbridge_green/ViewModel/PatientDetailsVM.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../Model/ApiClient.dart';
 import '../Utils/NavigateController.dart';
-import '../ViewModel/BookedServiceVM.dart';
 import 'Helper/LoadingIndicator.dart';
 import 'Helper/ThemeCard.dart';
 import 'NewRequestView.dart';
@@ -719,7 +713,7 @@ class _PaymentViewState extends State<PaymentView> {
                             onTap: () {
                               showDialog(
                                   context: context,
-                                  barrierDismissible: true,
+                                  barrierDismissible: false,
                                   builder: (_) => paymentAlert(
                                       context, height, width, "CASH"));
                             },
@@ -828,6 +822,8 @@ class _PaymentViewState extends State<PaymentView> {
 
   submitPayment(height, width, String paytype) async {
     var userNo = await LocalDB.getLDB('userID');
+     var venueNo = await LocalDB.getLDB("venueNo") ?? "";
+    var venueBranchNo = await LocalDB.getLDB("venueBranchNo") ?? "";
     int disAmount = editAmount.text.isEmpty ? 0 : int.parse(editAmount.text);
 
     // BookedServiceVM model1 = Provider.of<BookedServiceVM>(context, listen: false);
@@ -848,7 +844,11 @@ class _PaymentViewState extends State<PaymentView> {
       "discountAmount": disAmount,
       "netAmount": NetAmount,
       "paidAmount": NetAmount,
-      "collectedAmount": NetAmount
+      "collectedAmount": NetAmount,
+      "userNo": userNo,
+      "venueNo": venueNo,
+      "venueBranchNo": venueBranchNo,
+
       // "Amount": NetAmount
     };
 

@@ -8,14 +8,17 @@ import '../ViewModel/BookedServiceVM.dart';
 import '../ViewModel/ServiceDetailsVM.dart';
 import 'ServicesView.dart';
 
+
 int cartCount = 2;
+
+
 class SearchTests extends StatefulWidget {
   final String referalID;
   final String BookingID;
   final String bookingType;
-    final String regdate;
-    final List<String>TestList;
-    final VoidCallback ontap;
+  final String regdate;
+  final List<String>TestList;
+  final VoidCallback ontap;
 
    SearchTests({Key? key, required this.BookingID, required this.referalID, required this.bookingType, required this.regdate, required this.TestList, required this.ontap}) : super(key: key);
 

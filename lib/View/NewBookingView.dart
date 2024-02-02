@@ -584,7 +584,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                           ),
                           SizedBox(
                             width: width * 0.9,
-                            height: height * 0.07,
+                            height: height * 0.078,
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
@@ -634,7 +634,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                               // SizedBox(width: width * 0.08),
                               SizedBox(
                                 width: width * 0.35,
-                                height: height * 0.07,
+                                height: height * 0.078,
                                 child: DropdownButtonFormField2(
                                   dropdownDecoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(25),
@@ -711,7 +711,7 @@ class _NewBookingViewState extends State<NewBookingView> {
 
                               SizedBox(
                                 width: width * 0.55,
-                                height: height * 0.07,
+                                height: height * 0.078,
                                 child: TextFormField(
                                   textInputAction: TextInputAction.next,
                                   cursorColor: Colors.black,
@@ -752,7 +752,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                           SizedBox(height: height * 0.013),
                           SizedBox(
                             width: width * 0.9,
-                            height: height * 0.07,
+                            height: height * 0.078,
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
@@ -786,7 +786,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                           SizedBox(height: height * 0.013),
                           SizedBox(
                             width: width * 0.9,
-                            height: height * 0.07,
+                            height: height * 0.078,
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
@@ -822,7 +822,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                           SizedBox(height: height * 0.013),
                           SizedBox(
                             width: width * 0.9,
-                            height: height * 0.07,
+                            height: height * 0.078,
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
@@ -898,7 +898,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                             children: [
                               SizedBox(
                                 width: width * 0.4,
-                                height: height * 0.07,
+                                height: height * 0.078,
                                 child: TextFormField(
                                   controller: dob,
                                   readOnly: true,
@@ -938,7 +938,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                               SizedBox(width: width * 0.08),
                               SizedBox(
                                 width: width * 0.4,
-                                height: height * 0.07,
+                                height: height * 0.078,
                                 child: AbsorbPointer(
                                   absorbing: isGenderAutoUpdated,
                                   child: DropdownButtonFormField2(
@@ -1017,7 +1017,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                           SizedBox(height: height * 0.013),
                           SizedBox(
                             width: width * 0.9,
-                            height: height * 0.07,
+                            height: height * 0.078,
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
@@ -1066,7 +1066,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                               : const SizedBox(),
                           SizedBox(
                             width: width * 0.9,
-                            height: height * 0.07,
+                            height: height * 0.078,
                             child: TextFormField(
                               textInputAction: TextInputAction.next,
                               cursorColor: Colors.black,
@@ -1145,7 +1145,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                             children: [
                               SizedBox(
                                 width: width * 0.4,
-                                height: height * 0.07,
+                                height: height * 0.078,
                                 child: TextFormField(
                                   textInputAction: TextInputAction.next,
                                   cursorColor: Colors.black,
@@ -1179,7 +1179,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                               SizedBox(width: width * 0.08),
                               SizedBox(
                                 width: width * 0.4,
-                                height: height * 0.07,
+                                height: height * 0.078,
                                 child: TextFormField(
                                   onChanged: (value) async{
                                     if (value.length == 6) {
@@ -1488,7 +1488,7 @@ class _NewBookingViewState extends State<NewBookingView> {
       //     children: [
       //       SizedBox(
       //         width: width * 0.9,
-      //         height: height * 0.07,
+      //         height: height * 0.078,
       //         child: TextFormField(
       //           readOnly: true,
       //           controller: clientName,
@@ -1634,7 +1634,7 @@ class _NewBookingViewState extends State<NewBookingView> {
       children: [
         SizedBox(
           width: width * 0.9,
-          // height: height * 0.07,
+          // height: height * 0.078,
           child: TextFormField(
             readOnly: true,
             controller: doctorName,
@@ -1761,7 +1761,7 @@ class _NewBookingViewState extends State<NewBookingView> {
                 SizedBox(height: height * 0.01),
                 SizedBox(
                   width: width * 0.8,
-                  height: height * 0.07,
+                  height: height * 0.078,
                   child: TextFormField(
                     initialValue: adress,
                     decoration: InputDecoration(

@@ -435,7 +435,7 @@ class _BarcodePageState extends State<BarcodePage> {
       "lstBarcode": [
         {"sampleNo": sampleno, "barcodeNo": barcodeNum}
       ],
-      "test_id": testname ?? "",
+      // "test_id": testname ?? "",
       "bookingID": bookingid
     };
     print(params);
@@ -641,7 +641,7 @@ class _BarcodePageState extends State<BarcodePage> {
             "lstBarcode": [
               {"sampleNo": sampleno, "barcodeNo": Qrtext.text.toString()}
             ],
-            "test_id": testname ?? "",
+            // "test_id": testname ?? "",
             "bookingID": bookingid
           };
           print(params);
